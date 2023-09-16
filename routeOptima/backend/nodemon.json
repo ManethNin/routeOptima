@@ -1,0 +1,10 @@
+{
+    "env": {
+        "JWT_KEY": "route_optima_mora_dev_secret",
+        "DB_HOST": "localhost",
+        "DB_USER": "root",
+        "DB_PASSWORD": "",
+        "DB_NAME": "routeOptima",
+        "LINE_BREAKER_1": " New Line Break "
+    }
+}
