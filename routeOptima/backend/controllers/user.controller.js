@@ -30,7 +30,7 @@ const generateUserId = () => {
 function signUp(req, res) {
     //Sign up
 
-    const { firstName, lastName, email, password, address, country } = req.body;
+    const { firstName, lastName, email, password, address, country,role } = req.body;
 
     dbPool.query('SELECT id FROM user WHERE email = ?', [email], (error, results) => {
 
@@ -45,13 +45,13 @@ function signUp(req, res) {
 
             bcryptjs.genSalt(10, function (err, salt) {
                 bcryptjs.hash(req.body.password, salt, function (err, hash) {
-
+                    
                     const sql = "INSERT INTO `user`(`id`, `password`, `address`, `email`, " +
                         "`country`, `role`, `first_name`, `last_name`) " +
                         "VALUES (?,?,?,?,?,?,?,?)";
 
 
-                    dbPool.query(sql, [userId, hash, address, email, country, "user", firstName, lastName], (error, results) => {
+                    dbPool.query(sql, [userId, hash, address, email, country, role, firstName, lastName], (error, results) => {
                         if (error) {
                             // console.error(error);
                             return res.status(250).json({ message: 'Error creating',error:error });
@@ -92,12 +92,15 @@ function login(req, res) {
                         if (result) {
                             const token = jwt.sign({
                                 email: results[0].email,
-                                userId: results[0].user_id,
+                                userId: results[0].id,
                                 role: results[0].role
+                               
                             }, process.env.JWT_KEY, function (err, token) {
                                 return res.status(200).json({
                                     message: "Authentication successful!",
-                                    token: token
+                                    token: token,
+                                    status: results[0].status,
+                                    role: results[0].role
                                 });
                             });
                         } else {
@@ -124,7 +127,9 @@ function login(req, res) {
                                 }, process.env.JWT_KEY, function (err, token) {
                                     return res.status(200).json({
                                         message: "Authentication successful(admin)!",
-                                        token: token
+                                        token: token,
+                                        role:resultsAdmin[0].role,
+                                        status: 1,
                                     });
                                 });
 

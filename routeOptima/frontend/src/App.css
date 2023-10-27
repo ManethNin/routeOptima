@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap');
 
 
 .App {
@@ -49,5 +50,13 @@
 .css-o9k5xi-MuiInputBase-root-MuiOutlinedInput-root {
   height: 40px !important;
 }
+
+
+
+*{
+  font-family: "Poppins", sans-serif !important;
+}
+
+
 
 

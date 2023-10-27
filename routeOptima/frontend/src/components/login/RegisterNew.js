@@ -11,8 +11,10 @@ import { useNavigate, Link } from "react-router-dom";
 import Swal from 'sweetalert2'
 import './Login.css'
 import { motion } from "framer-motion";
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 
-import bg2 from '../../assets/bg2.jpg';
+import bg2 from '../../assets/bg2.png';
 
 const Toast = Swal.mixin({
     toast: true,
@@ -24,7 +26,7 @@ const Toast = Swal.mixin({
 
 
 export default function RegisterNew() {
- 
+
 
     useEffect(() => {
         fetch(
@@ -43,11 +45,13 @@ export default function RegisterNew() {
     const [createdCountry, setcreatedCountry] = useState(null);
     const [showAlert, setShowAlert] = useState(null);
 
+    const [role, setRole] = useState(0);
 
 
 
 
 
+    console.log(role)
     const validationSchema = yup.object({
         firstName: yup.string()
             .min(2, 'Min 2 characters')
@@ -123,7 +127,8 @@ export default function RegisterNew() {
                 email: values.email,
                 password: values.password,
                 address: values.address,
-                country: createdCountry
+                country: createdCountry,
+                role: role
             }
 
             try {
@@ -177,9 +182,9 @@ export default function RegisterNew() {
 
 
     return (
-        <section id="sectionLogin"> 
+        <section id="sectionLogin">
             <img src={bg2} class="bg" />
-
+            <div class="overlay"></div>
             <motion.div animate={{ y: 0, opacity: 1 }} initial={{ opacity: 0, y: 30 }} transition={{ delay: 0.3, duration: 0.5 }} class="logIn ">
 
                 <h2>Sign Up</h2>
@@ -261,6 +266,32 @@ export default function RegisterNew() {
                     </Grid>
                 </Grid>
 
+                <Grid container spacing={2} >
+                    <Grid item xs={12} style={{  }}>
+                        <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={role}
+                            label="Role"
+                            onChange={(e)=>{setRole(e.target.value)}}
+                            fullWidth
+                            
+                        >
+                            <MenuItem value={0}>Customer</MenuItem>
+                            <MenuItem value={1}>Store Manager</MenuItem>
+                            <MenuItem value={2}>Delevery Manager</MenuItem>
+                            <MenuItem value={3}>Route Manager</MenuItem>
+                            <MenuItem value={4}>Product Manager</MenuItem>
+                            <MenuItem value={5}>Driver</MenuItem>
+                            <MenuItem value={6}>Driver Assistant</MenuItem>
+                            
+                        </Select>
+
+                     
+
+                    </Grid>
+                </Grid>
+
                 <Grid container spacing={2}>
                     <Grid item xs={6}>
                         <TextField
@@ -295,6 +326,6 @@ export default function RegisterNew() {
 
 
         </section>
-      
+
     );
 }
