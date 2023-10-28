@@ -159,7 +159,7 @@ function getOrdersByStore(req, res) {
 function markAsShipped(req, res) {
     const {id}=req.body;
     
-    dbPool.query("UPDATE `order_product` SET `shipped`=1 WHERE id=?", [id], (error, results) => {
+    dbPool.query("UPDATE `train_trip` SET `completed_status`=1 WHERE order_product_id=?", [id], (error, results) => {
         if (error) {
             return res.status(250).json({ message: 'Error' });
         } else {
