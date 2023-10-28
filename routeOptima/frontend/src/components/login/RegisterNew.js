@@ -46,6 +46,7 @@ export default function RegisterNew() {
     const [showAlert, setShowAlert] = useState(null);
 
     const [role, setRole] = useState(0);
+    const [store, setStore] = useState('STOR_1');
 
 
 
@@ -128,7 +129,8 @@ export default function RegisterNew() {
                 password: values.password,
                 address: values.address,
                 country: createdCountry,
-                role: role
+                role: role,
+                store: (role==1|| role==5|| role ==6) ? store: -1   
             }
 
             try {
@@ -291,6 +293,35 @@ export default function RegisterNew() {
 
                     </Grid>
                 </Grid>
+
+
+               {
+                (role==1|| role==5|| role ==6) ?
+                <Grid container spacing={2} >
+                <Grid item xs={12} style={{  }}>
+                    <Select
+                        labelId="demo-simple-select-label"
+                        id="demo-simple-select"
+                        value={store}
+                        label="Store"
+                        onChange={(e)=>{setStore(e.target.value)}}
+                        fullWidth
+                        
+                    >
+                        <MenuItem value={'STOR_1'}>Colombo</MenuItem>
+                        <MenuItem value={'STOR_2'} >Negombo</MenuItem>
+                        <MenuItem value={'STOR_3'} >Galle</MenuItem>
+                        <MenuItem value={'STOR_4'} >Matara</MenuItem>
+                        <MenuItem value={'STOR_5'} >Jaffna</MenuItem>
+                        <MenuItem value={'STOR_6'} >Trinco</MenuItem>
+                       
+                        
+                    </Select>
+
+                 
+                </Grid>
+            </Grid>:null
+               }
 
                 <Grid container spacing={2}>
                     <Grid item xs={6}>

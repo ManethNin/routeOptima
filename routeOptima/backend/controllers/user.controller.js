@@ -30,7 +30,7 @@ const generateUserId = () => {
 function signUp(req, res) {
     //Sign up
 
-    const { firstName, lastName, email, password, address, country,role } = req.body;
+    const { firstName, lastName, email, password, address, country,role,store } = req.body;
 
     dbPool.query('SELECT id FROM user WHERE email = ?', [email], (error, results) => {
 
@@ -47,11 +47,11 @@ function signUp(req, res) {
                 bcryptjs.hash(req.body.password, salt, function (err, hash) {
                     
                     const sql = "INSERT INTO `user`(`id`, `password`, `address`, `email`, " +
-                        "`country`, `role`, `first_name`, `last_name`) " +
-                        "VALUES (?,?,?,?,?,?,?,?)";
+                        "`country`, `role`, `first_name`, `last_name`, `store_id`) " +
+                        "VALUES (?,?,?,?,?,?,?,?,?)";
 
 
-                    dbPool.query(sql, [userId, hash, address, email, country, role, firstName, lastName], (error, results) => {
+                    dbPool.query(sql, [userId, hash, address, email, country, role, firstName, lastName,store], (error, results) => {
                         if (error) {
                             // console.error(error);
                             return res.status(250).json({ message: 'Error creating',error:error });
@@ -82,7 +82,7 @@ function login(req, res) {
     const { email, password } = req.body;
 
     try {
-        dbPool.query('SELECT password,id,email,role FROM user WHERE email = ?', [email], (error, results) => {
+        dbPool.query('SELECT password,id,email,role,store_id FROM user WHERE email = ?', [email], (error, results) => {
             // return res.status(200).json({ results: results });
             if (error) {
                 return res.status(250).json({ message: 'Error',error:error });
@@ -93,14 +93,16 @@ function login(req, res) {
                             const token = jwt.sign({
                                 email: results[0].email,
                                 userId: results[0].id,
-                                role: results[0].role
+                                role: results[0].role,
+                                store: results[0].store_id
                                
                             }, process.env.JWT_KEY, function (err, token) {
                                 return res.status(200).json({
                                     message: "Authentication successful!",
                                     token: token,
                                     status: results[0].status,
-                                    role: results[0].role
+                                    role: results[0].role,
+                                    store: results[0].store_id
                                 });
                             });
                         } else {

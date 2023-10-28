@@ -142,6 +142,35 @@ function deleteRoute(req,res){
 
 
 
+// store manager 
+function getOrdersByStore(req, res) {
+    const {shipped,store}=req.body;
+    
+    dbPool.query('SELECT *  FROM order_product WHERE processed = 1 AND store_id=? AND shipped=?', [store,shipped], (error, results) => {
+        if (error) {
+            return res.status(250).json({ message: 'Error' });
+        } else {
+            return res.status(250).json({ results: results });
+        }
+    })
+}
+
+
+function markAsShipped(req, res) {
+    const {id}=req.body;
+    
+    dbPool.query("UPDATE `order_product` SET `shipped`=1 WHERE id=?", [id], (error, results) => {
+        if (error) {
+            return res.status(250).json({ message: 'Error' });
+        } else {
+            return res.status(250).json({ message: "Mark As Shipped" });
+        }
+    })
+}
+
+
+
+
 
 module.exports = {
     getAllOrders,
@@ -151,4 +180,8 @@ module.exports = {
     addRoute,
     getRoute,
     deleteRoute,
+
+
+    getOrdersByStore,
+    markAsShipped
 } 
