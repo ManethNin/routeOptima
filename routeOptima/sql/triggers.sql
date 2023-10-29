@@ -19,16 +19,20 @@ DELIMITER ;
 -- mark train trip as completed 
 
 DELIMITER //
-CREATE TRIGGER update_train_trip_completed_status
-AFTER UPDATE ON order_product
+CREATE TRIGGER update_shipped
+AFTER UPDATE ON train_trip
 FOR EACH ROW
 BEGIN
-  IF NEW.shipped = 1 THEN
-    UPDATE train_trip
-    SET completed_status = 1
-    WHERE train_trip.order_product_id = NEW.id;
+  IF NEW.completed_status = 1 THEN
+    UPDATE order_product
+    SET shipped = 1
+    WHERE NEW.order_product_id = order_product.id;
   END IF;
 END;
 //
 DELIMITER ;
+
+
+
+
 

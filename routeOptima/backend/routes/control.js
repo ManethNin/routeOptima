@@ -20,8 +20,17 @@ router.delete('/route', checkAuth.checkAuth,orderController.deleteRoute);
 
 
 // store manager 
-router.post('/order-by-store', checkAuth.checkAuth,orderController.getOrdersByStore);
+router.post('/order-by-store', checkAuth.checkAuth,orderController.getOrdersByStore);   //get orders by store id
 router.post('/mark-as-shipped', checkAuth.checkAuth,orderController.markAsShipped);
 
+
+// delivery manager 
+router.post('/schedule', checkAuth.checkAuth,orderController.addUpdateTruckSchedule); 
+router.get('/schedule', checkAuth.checkAuth,orderController.getTruckSchedule);   
+router.delete('/schedule', checkAuth.checkAuth,orderController.deleteTruckSchedule);   
+
+router.post('/schedule/route', checkAuth.checkAuth,orderController.scheduleRouts);  
+router.post('/schedule/date', checkAuth.checkAuth,orderController.scheduleDateAvailablity);  
+router.post('/schedule/truck', checkAuth.checkAuth,orderController.scheduleTrucks);  
 
 module.exports = router;

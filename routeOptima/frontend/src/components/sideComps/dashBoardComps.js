@@ -11,7 +11,7 @@ const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: 
 export function SideNavigation(props) {
 
     const navigate = useNavigate();
-    const location=window.location.pathname
+    const location = window.location.pathname
 
     useEffect(() => {
         if (!localStorage.getItem('token') || !localStorage.getItem('role')) {
@@ -50,7 +50,7 @@ export function SideNavigation(props) {
             <ul className="side-menu top">
                 {props.data && props.data.map((item, index) => {
                     return (
-                        <li key={index} className={location==item.to?"active":""}>
+                        <li key={index} className={location == item.to ? "active" : ""}>
                             < Link to={item.to}>
                                 {item.icon}
                                 <span className="text">{item.name}</span>
@@ -104,5 +104,36 @@ export function TopBar(props) {
                 <img src={props.avatar} />
             </Link>
         </nav>
+    )
+}
+
+
+
+
+
+export function Table(props) {
+    return (
+        <div className="table-data " >
+            <div className="order boxShadow1 ">
+                <div className="head">
+                    <h3>{props.data.name}</h3>
+
+                </div>
+                <table>
+                    <thead>
+                        <tr style={{ color: 'balack' }}>
+                            {props.data.heading.map((val,index)=>{
+                                return(
+                                    <th key={index}>{val}</th>
+                                )
+                            })}
+                        </tr>
+                    </thead>
+                    <tbody>
+                      {props.data.body}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     )
 }

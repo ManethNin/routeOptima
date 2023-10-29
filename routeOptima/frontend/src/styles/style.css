@@ -58,7 +58,7 @@ td img {
 table, th, td {
     border-collapse: collapse;
     padding: 1rem;
-    text-align: left;
+    text-align: center;
 }
 
 thead th {
@@ -111,25 +111,28 @@ tbody tr.hide td img {
     padding: .4rem 0;
     border-radius: 2rem;
     text-align: center;
+    max-width: 170px;
 }
 
 .status.delivered {
     background-color: #86e49d;
-    color: #006b21;
+    color: #006b21 !important;
 }
 
 .status.cancelled {
     background-color: #d893a3;
-    color: #b30021;
+    color: #b30021 !important;
 }
 
 
 .status.pending {
-    background-color: #ebc474;
+    background-color: #eefa43ec !important;
+    color: rgb(145, 145, 3) !important;
 }
 
 .status.shipped {
-    background-color: #6fcaea;
+    background-color: #6fcaea !important;
+    color: rgb(3, 81, 145) !important;
 }
 
 

@@ -1,16 +1,36 @@
 import '../styles/dashboard.css';
+import '../styles/style.css';
 import { useState, useEffect } from 'react';
-import { Route, Routes,Link } from 'react-router-dom';
+import { Route, Routes, Link } from 'react-router-dom';
 import avatar from '../assets/twitter.png';
 import { SideNavigation, TopBar } from './sideComps/dashBoardComps';
-import { dashboardAdminData } from './_dashBoardData';
+import {
+    dashboardAdminData,
+    dashboardAdminOverview,
+
+    dashboardStoreManagerData,
+    dashboardStoreManagerOverview,
+
+    dashboardProductManagerData,
+    dashboardProductManagerOverview,
+
+    dashboardRouteManagerData,
+    dashboardRouteManagerOverview,
+} from './_dashBoardData';
 
 import Home from './Home';
+import { ProcessedOrders,SentToDilivery,AddRoute} from './sideComps/SideBarPages';
 // import AddDoctors from './AddDoctors';
 
 
 
+const dataAll = {
+    'admin': [dashboardAdminData, dashboardAdminOverview],
+    '1': [dashboardStoreManagerData, dashboardStoreManagerOverview],
+    '3':[dashboardRouteManagerData,dashboardRouteManagerOverview],
+    '4': [dashboardProductManagerData, dashboardProductManagerOverview],
 
+}
 
 
 export default function Dashboard() {
@@ -18,7 +38,7 @@ export default function Dashboard() {
 
     const addJs = () => {
         const allSideMenu = document.querySelectorAll('#sidebar .side-menu.top li a');
-        
+
         allSideMenu.forEach(item => {
             const li = item.parentElement;
 
@@ -64,18 +84,27 @@ export default function Dashboard() {
     return (
         <>
             <div id="dashboardWrapper">
-                <SideNavigation data={dashboardAdminData} />
+
+                <SideNavigation data={dataAll[localStorage.getItem('role')][0]} />
 
                 <section id="content">
                     <TopBar avatar={avatar} />
                     <Routes>
-                        <Route path="/" element={<Home/>} />
-                        {/* <Route path="/add-doctors" element={<AddDoctors/>} /> */}
-                      
-                       
+                        <Route path="/" element={<Home data={dataAll[localStorage.getItem('role')][1]} />} />
+                        <Route path="/processed" element={<ProcessedOrders />} />
+
+                        {/* store manager  */}
+                        <Route path="/added-to-store" element={<SentToDilivery completed="0" />} />
+                        <Route path="/store-completed" element={<SentToDilivery completed="1" />} />
+
+
+                        {/* route manager  */}
+                        <Route path="/add-route" element={<AddRoute/>} />
+                        
+
                     </Routes>
 
-                  
+
 
                 </section>
             </div>

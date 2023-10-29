@@ -49,6 +49,7 @@ function LoginNew() {
                 if (responseStatus === 200 | responseStatus === 201) {
                     localStorage.setItem('token', response.data['token']);
                     localStorage.setItem('role', response.data['role']);
+                    localStorage.setItem('store', response.data['store']);
                     if (response.data.status===0){
                         navigate('/');
                     }else{

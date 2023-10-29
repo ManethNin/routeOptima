@@ -57,6 +57,8 @@
   font-family: "Poppins", sans-serif !important;
 }
 
+.boxShadow1{
 
-
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+}
 

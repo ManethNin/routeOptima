@@ -17,6 +17,7 @@ export function defaultReq(method,url,data,callback1=null,callback2=null,callbac
     };
 
     axios.request(options).then(function (response) {
+       
         if (response.status === 200 || response.status === 201) {
             if(callback1){
                 callback1(response);
@@ -51,13 +52,14 @@ export function swalFireReq1(method,url,data,swal1=null,swal2=null,callback1=nul
     };
 
     axios.request(options).then(function (response) {
-       
+        // console.log(response.status)
         if (response.status === 200 || response.status === 201) {
             if(swal1){
                 Swal.fire({
                     title: 'Success!', text: swal1, icon: 'success', confirmButtonText: 'OK'
                 })
-            }if(callback1){
+            }
+            if(callback1){
                 callback1(response);
             }
         }else{
@@ -66,6 +68,7 @@ export function swalFireReq1(method,url,data,swal1=null,swal2=null,callback1=nul
                }
         }
     }).catch(function (error) {
+        // console.log("error tam")
        if(swal3){
         Swal.fire({ title: 'Error!', text: swal3, icon: 'error', confirmButtonText: 'OK' })
        }
