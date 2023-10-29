@@ -149,8 +149,8 @@
     position: relative;
     border: none;
     outline: none;
-    background-color: #11248e;
-background-image: linear-gradient(43deg, #11248e 0%, #d02ac7 46%, #ef9c28 100%);
+    background-color: #1199ce;
+/* background-image: linear-gradient(43deg, #11248e 0%, #d02ac7 46%, #ef9c28 100%); */
 
     
 
@@ -164,7 +164,7 @@ background-image: linear-gradient(43deg, #11248e 0%, #d02ac7 46%, #ef9c28 100%);
 
 .logIn .inputBox #btn:hover {
     background-color: #0b175c;
-background-image: linear-gradient(43deg, #0b175c 0%, #c322be 46%, #ce7e09 100%);
+/* background-image: linear-gradient(43deg, #0b175c 0%, #c322be 46%, #ce7e09 100%); */
 
 }
 

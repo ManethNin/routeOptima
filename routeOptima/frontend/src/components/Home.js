@@ -1,19 +1,14 @@
 
 import { Link } from "react-router-dom"
-// import doc1 from '../../assets/doctors/doctor1.jpg';
-// import doc2 from '../../assets/doctors/doctor2.jpg';
-// import doc3 from '../../assets/doctors/doctor3.jpg';
-// import doc4 from '../../assets/doctors/doctor4.jpg';
-// import doc5 from '../../assets/doctors/doctor5.jpg';
-// import doc6 from '../../assets/doctors/doctor6.jpg';
-
-
 import { useState, useEffect } from "react";
 import * as reqSend from "../global/reqSender";
 import { motion } from 'framer-motion';
-import { storeData } from './_dashBoardData';
+import { storeData, userRoles } from './_dashBoardData';
 import { Table } from "./sideComps/dashBoardComps";
 import { useNavigate } from "react-router-dom";
+
+import { personImages } from "./_dashBoardData";
+
 
 
 
@@ -56,8 +51,11 @@ export default function Home(props) {
             </ul>
 
             {(() => {
+                if (localStorage.getItem('role') == 'admin') {
+                    return <AdminHome isComponentChanged={isComponentChanged} setIsComponentChanged={setIsComponentChanged} />
 
-                if (localStorage.getItem('role') == '4') {
+                }
+                else if (localStorage.getItem('role') == '4') {
                     return <ProductManagerHome isComponentChanged={isComponentChanged} setIsComponentChanged={setIsComponentChanged} />
                 } else if (localStorage.getItem('role') == '1') {
 
@@ -72,6 +70,93 @@ export default function Home(props) {
         </main>
     )
 }
+
+
+
+
+
+function AdminHome(props) {
+    const [data, setData] = useState(null);
+    useEffect(() => {
+
+        reqSend.defaultReq("POST", 'user/get-users', {
+            status: 0,
+            start: 1,
+            end: 6
+        }, (response) => {
+            const dataR = response.data.results
+            setData(
+                {
+                    name: "Pending To Approve",
+                    heading: ["", "Name ", "Email",
+                        //  "Address",
+                        "Role", "Accept", "Reject"],
+                    body: dataR.map((row, index) => {
+                        return (
+
+                            <tr key={index}>
+                                <td></td>
+                                <td >
+                                    <div className="d-flex justify-content-center">
+                                        <img src={personImages[index%personImages.length]} />
+                                        <p>{row.first_name + " " + row.last_name}</p>
+                                    </div>
+                                </td>
+                                <td>{row.email}</td>
+                                {/* <td>{row.address}</td> */}
+                                <td>{userRoles[parseInt(row.role)]}</td>
+
+
+
+
+
+                                <td >
+                                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                        <motion.p
+                                            onClick={() => {
+                                                reqSend.swalFireReq1("PATCH", 'user/users-pending', { id: row.id },
+                                                    "User Added To system as " + userRoles[parseInt(row.role)], "Error While Adding.", (response) => {
+                                                        props.setIsComponentChanged(!props.isComponentChanged)
+                                                    }, "Error! Check Your Connection");
+                                            }}
+                                            whileHover={{ scale: 1.2, cursor: 'pointer' }} transition={{ delay: 0, duration: 0.05 }} className="status delivered" style={{ fontSize: '15px' }}>Accept User</motion.p>
+                                    </div>
+
+                                </td>
+
+                                <td >
+                                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                        <motion.p
+                                            onClick={() => {
+                                                reqSend.swalFireReq1("DELETE", 'user/users', { id: row.id },
+                                                    "Successfully Removed", "Error While Removing.", (response) => {
+                                                        props.setIsComponentChanged(!props.isComponentChanged)
+                                                    }, "Error! Check Your Connection");
+                                            }}
+                                            whileHover={{ scale: 1.2, cursor: 'pointer' }} transition={{ delay: 0, duration: 0.05 }} className="status cancelled" style={{ fontSize: '15px' }}>Reject User</motion.p>
+                                    </div>
+
+                                </td>
+                            </tr>
+                        )
+                    })
+                }
+
+            )
+        });
+
+    }, [props.isComponentChanged])
+
+    return (
+        <>
+            {data ? <Table data={data} /> : null}
+        </>
+    )
+}
+
+
+
+
 
 
 
@@ -102,7 +187,7 @@ function ProductManagerHome(props) {
 
                                 <td >
                                     <div className="d-flex justify-content-center">
-                                        <img src={""} />
+                                        <img src={personImages[index%personImages.length]} />
                                         <p>{row.first_name}</p>
                                     </div>
                                 </td>
@@ -151,6 +236,9 @@ function ProductManagerHome(props) {
 
 
 
+
+
+
 function StoreManagerHome(props) {
     const [data, setData] = useState(null);
 
@@ -181,7 +269,7 @@ function StoreManagerHome(props) {
 
                                 <td >
                                     <div className="d-flex justify-content-center">
-                                        <img src={""} />
+                                        <img src={personImages[index%personImages.length]} />
                                         <p>{row.first_name}</p>
                                     </div>
                                 </td>
@@ -229,7 +317,7 @@ function StoreManagerHome(props) {
 
 
 function RouteManagerHome(props) {
-    const navigate=useNavigate()
+    const navigate = useNavigate()
     const [data, setData] = useState(null);
 
     useEffect(() => {
@@ -265,8 +353,8 @@ function RouteManagerHome(props) {
                 if (row0[1].length > 0) {
 
 
-                    const d= {
-                        name: row0[0][1] ,
+                    const d = {
+                        name: row0[0][1],
                         heading: ["", "Name", "Max Time(H:M)", "Edit", "Delete"],
                         body: row0[1].map((row, index) => {
                             return (
@@ -278,22 +366,22 @@ function RouteManagerHome(props) {
                                     <td >
                                         <div style={{ display: 'flex', justifyContent: 'center' }}>
                                             <motion.p
-                                                onClick={()=>{
-                                                    navigate('/dashboard/add-route', { state: {id:row.id,name:row.name,maxTime:row.max_time.slice(0, 5),store:row0[0][0]} });
+                                                onClick={() => {
+                                                    navigate('/dashboard/add-route', { state: { id: row.id, name: row.name, maxTime: row.max_time.slice(0, 5), store: row0[0][0] } });
                                                 }}
                                                 whileHover={{ scale: 1.2, cursor: 'pointer' }} transition={{ delay: 0, duration: 0.05 }} className="status pending" style={{ fontSize: '15px' }}>Edit Route</motion.p>
                                         </div>
                                     </td>
                                     <td >
                                         <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                            <motion.p 
-                                             onClick={() => {
-                                                reqSend.swalFireReq1("DELETE", 'control/route/', { id: row.id },
-                                                    "Successfully Removed", "Error While Removing.", (response) => {
-                                                        props.setIsComponentChanged(!props.isComponentChanged)
-                                                    }, "Error! Check Your Connection");
-                                            }}
-                                            whileHover={{ scale: 1.2, cursor: 'pointer' }} transition={{ delay: 0, duration: 0.05 }} className="status cancelled" style={{ fontSize: '15px' }}>Remove Route</motion.p>
+                                            <motion.p
+                                                onClick={() => {
+                                                    reqSend.swalFireReq1("DELETE", 'control/route/', { id: row.id },
+                                                        "Successfully Removed", "Error While Removing.", (response) => {
+                                                            props.setIsComponentChanged(!props.isComponentChanged)
+                                                        }, "Error! Check Your Connection");
+                                                }}
+                                                whileHover={{ scale: 1.2, cursor: 'pointer' }} transition={{ delay: 0, duration: 0.05 }} className="status cancelled" style={{ fontSize: '15px' }}>Remove Route</motion.p>
                                         </div>
 
                                     </td>
@@ -304,7 +392,7 @@ function RouteManagerHome(props) {
                     }
 
                     return (
-                        d ? <Table  key={index0} data={d} /> : null
+                        d ? <Table key={index0} data={d} /> : null
                     )
                 } else {
                     return null

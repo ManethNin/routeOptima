@@ -24,7 +24,7 @@ function getAllOrders(req, res) {
 
     dbPool.query('SELECT o.id,o.shipped as shipped,o.quntity ,o.order_date,s.distination,u.first_name,s.id as store_id,o.product_id as product_id FROM order_product as o   INNER JOIN store as s ON s.id=o.store_id INNER JOIN user as u ON u.id=o.user_id WHERE processed = ?', [req.params.id], (error, results) => {
         if (error) {
-            return res.status(250).json({ message: error });
+            return res.status(250).json({ message: "Delete failed" });
         } else {
             return res.status(200).json({ results: results });
         }

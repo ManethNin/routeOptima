@@ -9,4 +9,10 @@ router.post('/sign-up', userController.signUp);
 router.post('/login', userController.login);
 
 
+
+router.post('/get-users', userController.getUsers);
+router.patch('/users-pending', userController.acceptUsers);
+router.delete('/users', userController.deleteUsers);
+
+
 module.exports = router;

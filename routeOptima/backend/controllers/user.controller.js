@@ -30,7 +30,7 @@ const generateUserId = () => {
 function signUp(req, res) {
     //Sign up
 
-    const { firstName, lastName, email, password, address, country,role,store } = req.body;
+    const { firstName, lastName, email, password, address, country, role, store } = req.body;
 
     dbPool.query('SELECT id FROM user WHERE email = ?', [email], (error, results) => {
 
@@ -45,16 +45,16 @@ function signUp(req, res) {
 
             bcryptjs.genSalt(10, function (err, salt) {
                 bcryptjs.hash(req.body.password, salt, function (err, hash) {
-                    
+
                     const sql = "INSERT INTO `user`(`id`, `password`, `address`, `email`, " +
                         "`country`, `role`, `first_name`, `last_name`, `store_id`) " +
                         "VALUES (?,?,?,?,?,?,?,?,?)";
 
 
-                    dbPool.query(sql, [userId, hash, address, email, country, role, firstName, lastName,store], (error, results) => {
+                    dbPool.query(sql, [userId, hash, address, email, country, role, firstName, lastName, store], (error, results) => {
                         if (error) {
                             // console.error(error);
-                            return res.status(250).json({ message: 'Error creating',error:error });
+                            return res.status(250).json({ message: 'Error creating', error: error });
                         } else {
                             res.status(201).json({ message: 'User created successfully' });
                         }
@@ -85,7 +85,7 @@ function login(req, res) {
         dbPool.query('SELECT password,id,email,role,store_id FROM user WHERE email = ?', [email], (error, results) => {
             // return res.status(200).json({ results: results });
             if (error) {
-                return res.status(250).json({ message: 'Error',error:error });
+                return res.status(250).json({ message: 'Error', error: error });
             } else {
                 if (results.length == 1) {
                     return bcryptjs.compare(password, results[0].password, function (err, result) {
@@ -95,7 +95,7 @@ function login(req, res) {
                                 userId: results[0].id,
                                 role: results[0].role,
                                 store: results[0].store_id
-                               
+
                             }, process.env.JWT_KEY, function (err, token) {
                                 return res.status(200).json({
                                     message: "Authentication successful!",
@@ -130,15 +130,15 @@ function login(req, res) {
                                     return res.status(200).json({
                                         message: "Authentication successful(admin)!",
                                         token: token,
-                                        role:resultsAdmin[0].role,
+                                        role: resultsAdmin[0].role,
                                         status: 1,
                                     });
                                 });
 
-                                return  token;
+                                return token;
                             }
                         }
-                        return res.status(250).json({message: "Invalid credentials!"});
+                        return res.status(250).json({ message: "Invalid credentials!" });
                     }
 
 
@@ -158,8 +158,44 @@ function login(req, res) {
 
 
 
+function getUsers(req, res) {
+    const { start, end,status } = req.body;
+    const sql="SELECT `id`, `name`, `email`, `first_name`, `last_name`, `address`, `country`, `role`,`store_id` FROM `user` WHERE status= ? AND role BETWEEN ? and ?  ORDER BY role ASC "
+    dbPool.query(sql, [status,start,end], (error, results) => {
+        if (error) {
+            return res.status(250).json({ message: error });
+        } else {
+            return res.status(200).json({ results: results });
+        }
+    })
+}
 
 
+
+
+function acceptUsers(req,res){
+    const { id } = req.body;
+    dbPool.query("UPDATE `user` SET `status`=1 WHERE id=?", [id], (error, results) => {
+        if (error) {
+            return res.status(250).json({ message: error });
+        } else {
+            return res.status(201).json({ message: "Updated" });
+        }
+    })
+}
+
+
+
+function deleteUsers(req,res){
+    const { id } = req.body;
+    dbPool.query("DELETE FROM `user` WHERE id=?", [id], (error, results) => {
+        if (error) {
+            return res.status(250).json({ message: error });
+        } else {
+            return res.status(201).json({ message: "User Deleted" });
+        }
+    })
+}
 
 
 
@@ -169,4 +205,11 @@ function login(req, res) {
 module.exports = {
     signUp: signUp,
     login: login,
+
+    getUsers,
+    acceptUsers,
+    deleteUsers
+
+
+    
 } 

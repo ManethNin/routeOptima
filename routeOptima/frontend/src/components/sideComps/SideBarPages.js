@@ -14,6 +14,83 @@ import { useLocation } from 'react-router-dom';
 import Swal from "sweetalert2";
 
 
+import { userRoles, storeData,personImages } from "../_dashBoardData";
+
+
+
+// admin 
+export function ViewUsers(props) {
+    const [data, setData] = useState(null);
+    const [isComponentChanged, setIsComponentChanged] = useState(false);
+    useEffect(() => {
+
+        reqSend.defaultReq("POST", 'user/get-users', {
+            status: parseInt(props.status),
+            start: parseInt(props.start),
+            end: parseInt(props.end)
+        }, (response) => {
+            const dataR = response.data.results
+            setData(
+                {
+                    name: "",
+                    heading: ["", "Name ", "Email",
+                        // "Address",
+                        "Role", "Remove"],
+                    body: dataR.map((row, index) => {
+                        return (
+
+                            <tr key={index}>
+                                <td></td>
+                                <td >
+                                    <div className="d-flex justify-content-center">
+                                        <img src={personImages[index%personImages.length]} />
+                                        <p>{row.first_name + " " + row.last_name}</p>
+                                    </div>
+                                </td>
+                                <td>{row.email}</td>
+                                {/* <td>{row.address}</td> */}
+                                <td>{userRoles[parseInt(row.role)]}</td>
+
+                                <td >
+                                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                        <motion.p
+                                            onClick={() => {
+                                                reqSend.swalFireReq1("DELETE", 'user/users', { id: row.id },
+                                                    "Successfully Removed", "Error While Removing.", (response) => {
+                                                        setIsComponentChanged(!isComponentChanged)
+                                                    }, "Error! Check Your Connection");
+                                            }}
+                                            whileHover={{ scale: 1.2, cursor: 'pointer' }} transition={{ delay: 0, duration: 0.05 }} className="status cancelled" style={{ fontSize: '15px' }}>Remove User</motion.p>
+                                    </div>
+
+                                </td>
+                            </tr>
+                        )
+                    })
+                }
+
+            )
+        });
+
+    }, [isComponentChanged,props.start,props.status])
+
+    return (
+        <>
+            <main>
+
+                <div className="head-title">
+                    <div className="left">
+                        <h1>{props.title}</h1>
+                    </div>
+
+                </div>
+
+                {data ? <Table data={data} /> : null}
+            </main>
+        </>
+    )
+}
+
 
 
 // product manager 
@@ -42,7 +119,7 @@ export function ProcessedOrders(props) {
 
                                 <td >
                                     <div className="d-flex justify-content-center">
-                                        <img src={""} />
+                                        <img src={personImages[index%personImages.length]} />
                                         <p>{row.first_name}</p>
                                     </div>
                                 </td>
@@ -123,7 +200,7 @@ export function SentToDilivery(props) {
 
                                 <td >
                                     <div className="d-flex justify-content-center">
-                                        <img src={""} />
+                                        <img src={personImages[index%personImages.length]} />
                                         <p>{row.first_name}</p>
                                     </div>
                                 </td>
@@ -182,22 +259,22 @@ export function AddRoute(props) {
     const location = useLocation();
     const stateParams = location.state;
 
-    
-    const [store, setStore] = useState(stateParams?stateParams.store:"STOR_1");
-    const [name, setName] = useState(stateParams?stateParams.name:"");
-    const [maxTime, setMaxTime] = useState(stateParams?stateParams.maxTime:null)
+
+    const [store, setStore] = useState(stateParams ? stateParams.store : "STOR_1");
+    const [name, setName] = useState(stateParams ? stateParams.name : "");
+    const [maxTime, setMaxTime] = useState(stateParams ? stateParams.maxTime : null)
 
 
-    
+
     const handelSubmit = (event) => {
         event.preventDefault();
-        if(name.trim()!="" &&  maxTime!=null  && maxTime!="Invalid Date"){
+        if (name.trim() != "" && maxTime != null && maxTime != "Invalid Date") {
             const submitData = {
                 name: name,
                 storeId: store,
                 maxTime: maxTime,
-                startTime:'00:00',
-                id:stateParams?stateParams.id:null
+                startTime: '00:00',
+                id: stateParams ? stateParams.id : null
             }
             reqSend.defaultReq("POST", 'control/add-route/', submitData, responce => {
                 Swal.fire({ title: 'Success!', text: "Changes Applied", icon: 'success', confirmButtonText: 'OK' })
@@ -209,10 +286,10 @@ export function AddRoute(props) {
                     Swal.fire({ title: 'Error!', text: "Something went Wrong", icon: 'error', confirmButtonText: 'OK' })
                 }
             );
-        }else{
+        } else {
             Swal.fire({ title: 'Error!', text: "Enter Valied Data", icon: 'error', confirmButtonText: 'OK' })
         }
-      
+
 
 
     }
@@ -220,7 +297,7 @@ export function AddRoute(props) {
 
     function CustomTimePickerToolbar() {
         return null;
-      }
+    }
 
 
     return (
@@ -272,7 +349,7 @@ export function AddRoute(props) {
                                         <StaticTimePicker
                                             orientation="landscape"
                                             ampm={false}
-                                         
+
                                             value={dayjs(maxTime, 'HH:mm')}
                                             onChange={(newTime) => setMaxTime(newTime.format('HH:mm'))}
                                             toolbarTitle=""

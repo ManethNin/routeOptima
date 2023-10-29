@@ -19,7 +19,7 @@ import {
 } from './_dashBoardData';
 
 import Home from './Home';
-import { ProcessedOrders,SentToDilivery,AddRoute} from './sideComps/SideBarPages';
+import { ProcessedOrders, SentToDilivery, AddRoute,ViewUsers } from './sideComps/SideBarPages';
 // import AddDoctors from './AddDoctors';
 
 
@@ -27,7 +27,7 @@ import { ProcessedOrders,SentToDilivery,AddRoute} from './sideComps/SideBarPages
 const dataAll = {
     'admin': [dashboardAdminData, dashboardAdminOverview],
     '1': [dashboardStoreManagerData, dashboardStoreManagerOverview],
-    '3':[dashboardRouteManagerData,dashboardRouteManagerOverview],
+    '3': [dashboardRouteManagerData, dashboardRouteManagerOverview],
     '4': [dashboardProductManagerData, dashboardProductManagerOverview],
 
 }
@@ -90,6 +90,12 @@ export default function Dashboard() {
                 <section id="content">
                     <TopBar avatar={avatar} />
                     <Routes>
+                        {/* admin  */}
+                        <Route path="/view-customers" element={<ViewUsers status="0" start="0" end="0"  title="All Customers"/>} />
+                        <Route path="/view-users" element={<ViewUsers status="1" start="1" end="6"  title="All Users"/>} />
+
+
+                        {/* product manager  */}
                         <Route path="/" element={<Home data={dataAll[localStorage.getItem('role')][1]} />} />
                         <Route path="/processed" element={<ProcessedOrders />} />
 
@@ -99,8 +105,8 @@ export default function Dashboard() {
 
 
                         {/* route manager  */}
-                        <Route path="/add-route" element={<AddRoute/>} />
-                        
+                        <Route path="/add-route" element={<AddRoute />} />
+
 
                     </Routes>
 
