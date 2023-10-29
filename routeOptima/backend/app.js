@@ -10,7 +10,9 @@ const axios = require("axios");
 
 
 
-app.use(cors());
+app.use(cors({
+    origin: '*'
+}));
 app.use(bodyParser.json());
 app.use("/user", userRoute);
 app.use("/control", controlRoute);

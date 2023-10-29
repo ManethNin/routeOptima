@@ -1,0 +1,115 @@
+.Truck-Delivery {
+  border-radius: 20px;
+  padding: 2rem;
+  -webkit-backdrop-filter: blur(40px);
+  backdrop-filter: blur(40px);
+  overflow-x: auto;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.Header {
+  margin: auto;
+  margin-bottom: 30px;
+  margin-top: 20px;
+  width: 90%;
+  height: 15%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+table {
+  width: 100%;
+}
+
+table tr {
+  border-bottom: 3px solid rgba(255, 255, 255, 0.1);
+
+}
+
+th,
+td {
+  padding: 10px;
+  text-align: left;
+}
+
+td:nth-child(5) {
+  text-align: right;
+  padding-right: 5%;
+}
+
+.last-row {
+  border: none;
+  border-bottom: none;
+}
+
+
+.counter {
+  width: 15%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.customer-name {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.price span,
+.total-price span {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.total {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.total-price {
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+.btn {
+  font-size: 30px;
+  transition: 0.1s;
+  cursor: pointer;
+  line-height: 10px;
+}
+
+.btn:hover {
+  transform: scale(1.2);
+}
+
+.count {
+  font-size: 20px;
+  margin: auto 10px;
+}
+
+.button {
+  text-align: center;
+  padding: 5px;
+  border: 1px solid white;
+  outline: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8em;
+  color: white;
+}
+
+.button:hover {
+  color: black;
+  background: white;
+  transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+
+  th:nth-child(2),
+  td:nth-child(2) {
+    display: none;
+  }
+}
