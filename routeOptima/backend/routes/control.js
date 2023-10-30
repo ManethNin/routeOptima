@@ -30,7 +30,10 @@ router.get('/schedule', checkAuth.checkAuth,orderController.getTruckSchedule);
 router.delete('/schedule', checkAuth.checkAuth,orderController.deleteTruckSchedule);   
 
 router.post('/schedule/route', checkAuth.checkAuth,orderController.scheduleRouts);  
-router.post('/schedule/date', checkAuth.checkAuth,orderController.scheduleDateAvailablity);  
+
+
+
+
 router.post('/schedule/truck', checkAuth.checkAuth,orderController.scheduleTrucks);  
 
 module.exports = router;

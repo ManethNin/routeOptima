@@ -193,7 +193,7 @@ function markAsShipped(req, res) {
 function addUpdateTruckSchedule(req, res) {
     const { date, routeId, truckId, driverId, assitantId, id } = req.body
     if (id) {
-        dbPool.query("UPDATE `truck_schedule` SET `truck_id`=?,`driver_user_id`=?,`assistant_user_id`=?,`route_id`=?,`date`=? WHERE id=?",
+        dbPool.query("UPDATE `truck_schedule` SET `truck_id`=?,`driver_user_id`=?,`assistant_user_id`=?,`route_id`=?,`time`=? WHERE id=?",
             [truckId, driverId, assitantId, routeId, date, id], (error, results) => {
                 if (error) {
                     return res.status(250).json({ message: 'Error' });
@@ -207,29 +207,22 @@ function addUpdateTruckSchedule(req, res) {
 
         const idNew = "SCHEDULE_" + generateId();
 
-        dbPool.query("SELECT id FROM `truck_schedule` WHERE date=? AND route_id=?",
-            [date, routeId], (error, results) => {
+
+        dbPool.query("INSERT INTO `truck_schedule`(`id`, `truck_id`, `driver_user_id`, `assistant_user_id`,`route_id`, `time`) VALUES (?,?,?,?,?,?)",
+            [idNew, truckId, driverId, assitantId, routeId, date], (error, results) => {
                 if (error) {
                     return res.status(250).json({ message: 'Error' });
                 } else {
-                    if (results.length === 0) {
-                        dbPool.query("INSERT INTO `truck_schedule`(`id`, `truck_id`, `driver_user_id`, `assistant_user_id`,`route_id`, `date`) VALUES (?,?,?,?,?,?)",
-                            [idNew, truckId, driverId, assitantId, routeId, date], (error, results) => {
-                                if (error) {
-                                    return res.status(250).json({ message: 'Error' });
-                                } else {
-                                    return res.status(201).json({ message: "Successflly Created" });
-                                }
-                            })
-                    } else {
-                        return res.status(250).json({ message: "Alrady Scheduled Truck for this date and route" });
-                    }
-
+                    return res.status(201).json({ message: "Successflly Created" });
                 }
             })
 
+
     }
 }
+
+
+
 
 
 function getTruckSchedule(req, res) {
@@ -255,6 +248,8 @@ function deleteTruckSchedule(req, res) {
         })
 }
 
+
+
 function scheduleRouts(req, res) {
     dbPool.query("SELECT * FROM route WHERE store_id=?",
         [req.body.storeId], (error, results) => {
@@ -266,71 +261,121 @@ function scheduleRouts(req, res) {
         })
 }
 
-function scheduleDateAvailablity(req, res) {
-    const { date, routeId } = req.body
-    dbPool.query("SELECT id FROM `truck_schedule` WHERE date=? AND route_id=?",
-        [date, routeId], (error, results) => {
 
-            if (error) {
-                return res.status(500).json({ message: 'Error' });
-            } else {
-                if (results.length === 0) {
-                    return res.status(200).json({ results: 1 });
-                } else {
-                    return res.status(250).json({ message: "Alrady Scheduled Truck for this date and route" });
-                }
-            }
-        })
-}
+
+
+
 
 
 function scheduleTrucks(req, res) {
-    dbPool.query(
-        "SELECT t.id as id, t.max_capacity as max_capacity " +
-        "FROM truck t " +
-        "LEFT JOIN truck_schedule ts " +
-        "ON t.id = ts.truck_id AND ts.date = ? " +
-        "WHERE (ts.id IS NULL OR ts.date IS NULL) AND t.store_id = ?",
-        [req.body.date, req.body.storeId],
-        (error, results) => {
+    const { startTime, storeId, routeId } = req.body
+    dbPool.query("SELECT max_time FROM route WHERE id=?",
+        [req.body.routeId], (error, results) => {
             if (error) {
                 return res.status(250).json({ message: 'Error' });
             } else {
-                return res.status(200).json({ results: results });
+                const maxTime = results[0].max_time
+                const sql = "SELECT ts.truck_id, ts.driver_user_id, ts.assistant_user_id,ts.time " +
+                    "FROM truck_schedule ts " +
+                    "JOIN route r ON ts.route_id = r.id " +
+                    "WHERE " +
+                    "? BETWEEN ts.`time` AND ADDTIME(ts.`time`, r.max_time) OR " +
+                    "ADDTIME(?, ?) BETWEEN ts.`time` AND ADDTIME(ts.`time`, r.max_time) OR " +
+                    "(? <= ts.`time` AND (ADDTIME(?, ?)) >= ADDTIME(ts.`time`, r.max_time))"
+                dbPool.query(
+                    sql,
+                    [startTime, startTime, maxTime, startTime, startTime, maxTime],
+                    (error, results2) => {
+                        if (error) {
+                            return res.status(250).json({ message: error, results: sql });
+                        } else {
+                            const truckIds = results2.map(result => result.truck_id).join("','");
+
+                            const response = {};
+
+                            // Create a Promise for the first database query
+                            const query1Promise = new Promise((resolve, reject) => {
+                                dbPool.query("SELECT * FROM truck WHERE store_id=? AND id NOT IN('" + truckIds + "')",
+                                    [storeId], (error, results3) => {
+                                        if (error) {
+                                            reject('Error in the first query');
+                                        } else {
+                                            response['truckData'] = results3;
+                                            resolve();
+                                        }
+                                    });
+                            });
+
+                            const date2 = startTime.match(/\d{4}\.\d{2}\.\d{2}/)[0];
+                            const query2Promise = new Promise((resolve, reject) => {
+                                dbPool.query(
+                                    "SELECT u.id, d.work_hours FROM truck_schedule AS ts " +
+                                    "RIGHT JOIN user AS u ON u.id = ts.driver_user_id " +
+                                    "LEFT JOIN driver AS d ON d.user_id = u.id " +
+                                    "WHERE (DATE(ts.time) != ? OR ts.time IS NULL) " +
+                                    "AND u.role = 5 AND u.status = 1 AND " +
+                                    "(d.work_hours + ? <= 40 OR d.work_hours IS NULL)",
+                                    [date2, maxTime],
+                                    (error, results3) => {
+                                        if (error) {
+                                            resolve();
+                                        } else {
+                                            // response['drivers'] = results3;
+                                            resolve();
+                                        }
+                                    }
+                                );
+                            });
+
+                            const query3Promise = new Promise((resolve, reject) => {
+                                dbPool.query(
+                                    "SELECT assistant_user_id FROM truck_schedule WHERE DATE(`time`) = ?  GROUP BY assistant_user_id HAVING COUNT(id) >2",
+                                    [date2],
+                                    (error, results3) => {
+                                        if (error) {
+                                            resolve();
+                                        } else {
+                                            const assIds = results3.map(result => result.assistant_user_id).join("','");
+
+                                            dbPool.query(
+                                                "SELECT u.id, a.work_hours from user as u LEFT JOIN assistant as a  ON a.user_id=u.id WHERE u.id NOT IN('" + assIds + "') AND u.role=6 AND u.status=1 AND (a.work_hours + ? <= 60 OR a.work_hours IS NULL)",
+                                                [maxTime],
+                                                (error, results4) => {
+                                                    if (error) {
+                                                        resolve();
+                                                    } else {
+                                                        response['assistant'] = results4;
+                                                        resolve();
+
+                                                    }
+                                                }
+                                            );
+                                        }
+                                    }
+                                );
+                            });
+
+
+                            Promise.all([query1Promise, query2Promise, query3Promise])
+                                .then(() => {
+                                    res.status(200).json(response);
+                                })
+                                .catch((error) => {
+                                    res.status(250).json({ message: error });
+                                });
+
+                        }
+                    }
+                );
             }
-        }
-    );
-}
-
-
-
-function scheduleDrivers(req, res) {
-    dbPool.query(
-        "SELECT t.id as id, t.max_capacity as max_capacity " +
-        "FROM truck t " +
-        "LEFT JOIN truck_schedule ts " +
-        "ON t.id = ts.truck_id AND ts.date = ? " +
-        "WHERE (ts.id IS NULL OR ts.date IS NULL) AND t.store_id = ?",
-        [req.body.date, req.body.storeId],
-        (error, results) => {
-            if (error) {
-                return res.status(250).json({ message: 'Error' });
-            } else {
-                return res.status(200).json({ results: results });
-            }
-        }
-    );
-}
-
-
-
-
-
-
-
-function getAvailableDeliveries(req, res) {
+        })
 
 }
+
+
+
+
+
 
 
 
@@ -355,7 +400,6 @@ module.exports = {
     deleteTruckSchedule,
 
     scheduleRouts,
-    scheduleDateAvailablity,
     scheduleTrucks,
 
 } 
