@@ -10,7 +10,7 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { personImages } from "./_dashBoardData";
 
-
+import Swal from "sweetalert2";
 
 
 export default function Home(props) {
@@ -169,7 +169,6 @@ function AdminHome(props) {
 
 
 
-
 function ProductManagerHome(props) {
     const [data, setData] = useState(null);
 
@@ -232,11 +231,6 @@ function ProductManagerHome(props) {
         </>
     )
 }
-
-
-
-
-
 
 
 
@@ -319,6 +313,8 @@ function StoreManagerHome(props) {
         </>
     )
 }
+
+
 
 
 
@@ -415,84 +411,120 @@ function RouteManagerHome(props) {
 
 
 
+
+
 function DeliveryManagerHome(props) {
     const [data, setData] = useState(null);
+    const [schedule, setSchedule] = useState(null);
+
+    
+
 
     useEffect(() => {
 
         reqSend.defaultReq("POST", 'control/peinding-delivery', {
 
-        }, (response) => {
+        },  (response) => {
             const dataR = response.data.results
+            const temp = {};
+            dataR.forEach((row) => {
+                temp[row.id] = "default";
+            });
+            setSchedule(temp)
+            setData(dataR)
 
-            setData(
-                {
-                    name: "Pending Delivery",
-                    heading: ["", "ID", "Product Name", "Quntity", "Volume", "Order Date", "Name", "Select Scheduled Truck", "Status"],
-                    body: dataR.map((row, index) => {
-                        const onlyDate = new Date(row.order_date).toISOString().split('T')[0].replace(/-/g, '.')
-                        return (
-
-                            <tr key={index}>
-                                <td></td>
-                                <td>{row.id}</td>
-                                <td>{row.product_name}</td>
-                                <td>{row.quntity}</td>
-                                <td>{row.volume}</td>
-                                <td>{onlyDate}</td>
-
-                                <td >
-                                    <div className="d-flex justify-content-center">
-                                        <img src={personImages[index % personImages.length]} />
-                                        <p>{row.first_name}</p>
-                                    </div>
-                                </td>
-                                <td >
-                                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                        {/* <Select
-                                            labelId="demo-simple-select-label"
-                                            id="demo-simple-select" value={truck} label="Store" onChange={(e) => { setTruck(e.target.value) }} fullWidth
-                                        >
-                                            <MenuItem value={"default"}>Select Truck</MenuItem>
-                                            {selectingData.drivers.map((val, index) => {
-
-                                                return (
-                                                    <MenuItem key={index} value={val.id}>{val.first_name + " " + val.last_name + " (Work hours - " + (val.work_hours ? val.work_hours : 0) + ")"}</MenuItem>
-                                                )
-                                            })}
-                                        </Select> */}
-                                    </div>
-
-                                </td>
-
-                                <td >
-                                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                        <motion.p
-                                            onClick={() => {
-                                                reqSend.swalFireReq1("POST", 'control/mark-as-shipped', { id: row.id },
-                                                    "Added To Dilivery.Mark As Shipped", "Error While Adding.", (response) => {
-                                                        props.setIsComponentChanged(!props.isComponentChanged)
-                                                    }, "Error! Check Your Connection");
-                                            }}
-                                            whileHover={{ scale: 1.2, cursor: 'pointer' }} transition={{ delay: 0, duration: 0.05 }} className="status delivered" style={{ fontSize: '15px' }}>Add To Dilivery</motion.p>
-                                    </div>
-
-                                </td>
-
-                            </tr>
-
-                        )
-                    })
-                }
-
-            )
         });
 
 
     }, [props.isComponentChanged])
     return (
         <>
-            {data ? <Table data={data} /> : null}
+            <div className="table-data " >
+            <div className="order boxShadow1 ">
+                <div className="head">
+                    <h3>Pending Delivery</h3>
+
+                </div>
+                <table>
+                    <thead>
+                        <tr style={{ color: 'balack' }}>
+                            { ["", "ID", "Product Name", "Volume", "Order Date", "Name", "Select Scheduled Truck", "Status"].map((val,index)=>{
+                                return(
+                                    <th key={index}>{val}</th>
+                                )
+                            })}
+                        </tr>
+                    </thead>
+                    <tbody>
+                      {
+                        data&& data.map((row, index) => {
+                            const onlyDate = new Date(row.order_date).toISOString().split('T')[0].replace(/-/g, '.')
+                            return (
+    
+                                <tr key={index}>
+                                    <td></td>
+                                    <td>{row.id}</td>
+                                    <td>{row.product_name}</td>
+                                  
+                                    <td>{row.volume}</td>
+                                    <td>{onlyDate}</td>
+    
+                                    <td >
+                                        <div className="d-flex justify-content-center">
+                                            <img src={personImages[index % personImages.length]} />
+                                            <p>{row.first_name}</p>
+                                        </div>
+                                    </td>
+                                    <td >
+                                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                               
+                                                <Select
+                                                style={{width:'300px'}}
+                                                    labelId="demo-simple-select-label"
+                                                    id="demo-simple-select" value={schedule?schedule[row.id]:"default"} label="Store" onChange={(e) => { setSchedule({ ...schedule, [row.id]: e.target.value }) }} 
+                                                >
+                                                    <MenuItem value={"default"}>Select Schedule</MenuItem>
+                                                    {row.truck_schedules.map((val, index) => {
+    
+                                                        return (
+                                                            <MenuItem key={index} value={val.id}>{val.truck_id + " ("+ val.current_capacity + " of " + val.max_capacity +") at "+val.time}</MenuItem>
+                                                        )
+                                                    })}
+                                                </Select>
+                                            
+    
+                                        </div>
+    
+                                    </td>
+    
+                                    <td >
+                                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                            <motion.p
+                                                onClick={() => {
+                                                    if(schedule[row.id]!="default" && schedule!=null){
+                                                        reqSend.swalFireReq1("POST", 'control/add-dilivery', { scheduleId:schedule[row.id], productId:row.id },
+                                                        "Added To Dilivery Truck", "Error While Adding.", (response) => {
+                                                            props.setIsComponentChanged(!props.isComponentChanged)
+                                                        }, "Error! Check Your Connection");
+                                                    }else{
+                                                        Swal.fire({ title: 'Error!', text: "Please Select A Scheduled Truck", icon: 'error', confirmButtonText: 'OK' })
+                                                    }
+                                                   
+                                                }}
+                                                whileHover={{ scale: 1.2, cursor: 'pointer' }} transition={{ delay: 0, duration: 0.05 }} className="status delivered" style={{ fontSize: '15px' }}>Add To Dilivery</motion.p>
+                                        </div>
+    
+                                    </td>
+    
+                                </tr>
+    
+                            )
+                        })
+                      }
+                    </tbody>
+                </table>
+            </div>
+        </div>
         </>
     )
 }

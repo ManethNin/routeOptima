@@ -226,7 +226,7 @@ function addUpdateTruckSchedule(req, res) {
 
 
 function getTruckSchedule(req, res) {
-    dbPool.query("SELECT ts.id,r.name,r.store_id,ts.truck_id,CONCAT(DATE(ts.time), '') as date ,TIME(ts.time)  AS `time_local` FROM truck_schedule as ts INNER JOIN route as r ON r.id=ts.route_id WHERE  DATE(ts.time) >="+req.params.date,
+    dbPool.query("SELECT ts.id,r.name,r.store_id,ts.truck_id,CONCAT(DATE(ts.time), '') as date ,TIME(ts.time)  AS `time_local` FROM truck_schedule as ts INNER JOIN route as r ON r.id=ts.route_id WHERE  DATE(ts.time) >=" + req.params.date,
         [], (error, results) => {
             if (error) {
                 return res.status(250).json({ message: error });
@@ -374,56 +374,72 @@ function scheduleTrucks(req, res) {
 
 
 
-function getPendingDelivery(req,res){
+function getPendingDelivery(req, res) {
 
-    dbPool.query("SELECT o.id,o.quntity ,o.quntity*p.volume as volume ,o.order_date,u.first_name,p.name as product_name FROM order_product as o   INNER JOIN product as p ON p.id=o.product_id INNER JOIN user as u ON u.id=o.user_id WHERE  o.shipped=1 AND o.delevered=0 AND o.completd=0",
-    [], (error, results) => {
-        if (error) {
-            return res.status(250).json({ message: error });
-        } else {
-            return res.status(200).json({ results: results });
-        }
-    })
+    dbPool.query("SELECT o.id ,o.quntity ,o.route_id,o.quntity*p.volume as volume ,o.order_date,u.first_name,p.name as product_name FROM order_product as o   INNER JOIN product as p ON p.id=o.product_id INNER JOIN user as u ON u.id=o.user_id WHERE  o.shipped=1 AND o.delevered=0 AND o.completd=0",
+        [], (error, results) => {
+            if (error) {
+                return res.status(250).json({ message: error });
+            } else {
+               
+                const promiseArray = results.map(element => {
+                    return new Promise((resolve, reject) => {
+                       
+                        dbPool.query("SELECT ts.id,ts.truck_id,t.max_capacity,ts.current_capacity,CONCAT(DATE(ts.time), ' ',TIME(ts.time)) as time FROM truck_schedule AS ts INNER JOIN truck AS t ON ts.truck_id=t.id WHERE ts.route_id=? AND ts.current_capacity+? <=t.max_capacity",
+                            [element.route_id, element.volume], (error, results2) => {
+                                if (error) {
+                                    resolve()
+                                } else {
+                                    
+                                    element['truck_schedules']=results2 
+                                    resolve()
+                                    
+                                }
+                            })
+                    
+                            
+                            
+                        })
+                    
+                });
+                Promise.all(promiseArray)
+                    .then(() => {
+                        
+                        return res.status(200).json({ results: results });
+                    })
+                    .catch(err => {
+                        return res.status(250).json({ message: err });
+                    });
+            }
+        })
 }
 
 
-function getAvailableSchedules(req,res){
-     const {routeId,volume} = req.body
-    dbPool.query("SELECT ts.id,ts.truck_id,t.max_capacity,ts.current_capacity FROM truck_schedule AS ts INNER JOIN truck AS t ON ts.truck_id=t.id ts.route_id=? AND ts.current_capacity+? <=t.max_capacity",
-    [routeId,volume], (error, results) => {
-        if (error) {
-            return res.status(250).json({ message: error });
-        } else {
-            return res.status(200).json({ results: results });
-        }
-    })
+
+
+function addDeliveryToTruck(req, res) {
+    const { scheduleId, productId } = req.body
+    dbPool.query("INSERT INTO `truck_delivery`(`order_product_id`, `truck_schedule_id`) VALUES (?,?)",
+        [productId, scheduleId], (error, results) => {
+            if (error) {
+                return res.status(250).json({ message: error });
+            } else {
+                return res.status(200).json({ message: "Successfully Inserted" });
+            }
+        })
 }
 
 
-
-function addDeliveryToTruck(req,res){
-    const {scheduleId,productId} = req.body
-   dbPool.query("INSERT INTO `truck_delivery`(`order_product_id`, `truck_schedule_id`) VALUES (?,?)",
-   [productId,scheduleId], (error, results) => {
-       if (error) {
-           return res.status(250).json({ message: error });
-       } else {
-           return res.status(200).json({ message: "Successfully Inserted" });
-       }
-   })
-}
-
-
-function removeDeliveryFromTruck(req,res){
-    const {productId} = req.body
-   dbPool.query("DELETE FROM `truck_delivery` WHERE order_product_id=?",
-   [productId], (error, results) => {
-       if (error) {
-           return res.status(250).json({ message: error });
-       } else {
-           return res.status(200).json({ message: "Successfully Removed" });
-       }
-   })
+function removeDeliveryFromTruck(req, res) {
+    const { productId } = req.body
+    dbPool.query("DELETE FROM `truck_delivery` WHERE order_product_id=?",
+        [productId], (error, results) => {
+            if (error) {
+                return res.status(250).json({ message: error });
+            } else {
+                return res.status(200).json({ message: "Successfully Removed" });
+            }
+        })
 }
 
 
@@ -455,7 +471,7 @@ module.exports = {
     scheduleRouts,
     scheduleTrucks,
 
-    getAvailableSchedules,
+  
     addDeliveryToTruck,
     removeDeliveryFromTruck
 } 

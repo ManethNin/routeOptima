@@ -54,6 +54,8 @@ export const dashboardAdminOverview = {
 
 export const dashboardProductManagerData = [
     { name: "Dashboard", icon: <i className='bx bxs-dashboard' ></i>, active: true, to: '/dashboard' },
+    { name: "View Products", icon: <i className='bx bx-task'></i>, active: false, to: '/dashboard/view-products' },
+    { name: "Add Products", icon: <i className='bx bx-task'></i>, active: false, to: '/dashboard/add-products' },
     { name: "Processed Orders", icon: <i className='bx bx-task'></i>, active: false, to: '/dashboard/processed' },
 ]
 

@@ -52,7 +52,7 @@ export function swalFireReq1(method,url,data,swal1=null,swal2=null,callback1=nul
     };
 
     axios.request(options).then(function (response) {
-        console.log(response)
+        // console.log(response)
         if (response.status === 200 || response.status === 201) {
             if(swal1){
                 Swal.fire({

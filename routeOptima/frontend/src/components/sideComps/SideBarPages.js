@@ -3,6 +3,7 @@ import * as reqSend from "../../global/reqSender";
 import { motion } from 'framer-motion';
 import { dashboardAdminOverview } from '../_dashBoardData';
 import { Table } from "./dashBoardComps";
+import { Link } from "react-router-dom";
 import TextField from '@mui/material/TextField';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -173,6 +174,210 @@ export function ProcessedOrders(props) {
 
 
 
+export function ViewProducts(props) {
+    const [data, setData] = useState(null);
+    const [isComponentChanged, setIsComponentChanged] = useState(false);
+
+    const navigate = useNavigate()
+    useEffect(() => {
+
+        reqSend.defaultReq("GET", 'shop/getallproducts', {}, (response) => {
+            const dataR = response.data
+
+            setData(
+                {
+                    name: "",
+                    heading: ["", "Name", "Volume", "Unit Price", "Stock Quntity", "View", "Edit", "Delete"],
+                    body: dataR.map((row, index) => {
+
+                        return (
+
+                            <tr key={index}>
+                                <td></td>
+                                <td>{row.name}</td>
+                                <td>{row.volume}</td>
+                                <td>{row.unit_price}</td>
+                                <td>{row.stock_quantity}</td>
+
+                                {/* <td >
+                                    <div className="d-flex justify-content-center">
+                                        <img src={personImages[index % personImages.length]} />
+                                        <p>{row.first_name}</p>
+                                    </div>
+                                </td> */}
+                                <td>
+                                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                        <motion.p
+                                            whileHover={{ scale: 1.2, cursor: 'pointer' }} transition={{ delay: 0, duration: 0.05 }} className="status delivered" style={{ fontSize: '15px', minWidth: '100px' }}>View</motion.p>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                        <motion.p
+                                            onClick={() => { navigate('/dashboard/add-products', { state: { id: row.id, name: row.name, description: row.description, unit_price: row.unit_price, stock_quantity: row.stock_quantity, volume: row.volume } }) }}
+                                            whileHover={{ scale: 1.2, cursor: 'pointer' }} transition={{ delay: 0, duration: 0.05 }} className="status pending" style={{ fontSize: '15px', minWidth: '100px' }}>Edit</motion.p>
+                                    </div>
+                                </td>
+
+
+                                <td >
+                                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                        <motion.p
+                                            onClick={() => {
+                                                reqSend.swalFireReq1("PUT", 'shop/deleteproduct/' + row.id, {},
+                                                    "Successfully Removed", "Error While Removing.", (response) => {
+                                                        setIsComponentChanged(!isComponentChanged)
+                                                    }, "Error! Check Your Connection");
+                                            }}
+                                            whileHover={{ scale: 1.2, cursor: 'pointer' }} transition={{ delay: 0, duration: 0.05 }} className="status cancelled" style={{ fontSize: '15px' }}>Remove</motion.p>
+                                    </div>
+
+                                </td>
+                            </tr>
+                        )
+                    })
+                }
+
+            )
+        });
+    }, [isComponentChanged])
+
+
+
+
+    return (
+        <>
+            <main>
+
+                <div className="head-title">
+                    <div className="left">
+                        <h1>View Products</h1>
+                    </div>
+
+                    <Link to={'/dashboard/add-products'} className="btn-download">
+                        <i className='bx bxs-user-plus'></i>
+                        <span className="text">Add Products</span>
+                    </Link>
+
+                </div>
+
+                {data ? <Table data={data} /> : null}
+            </main>
+        </>
+    )
+
+}
+
+
+
+
+export function AddProducts(props) {
+    const location = useLocation();
+    const stateParams = location.state;
+
+
+    const [name, setName] = useState(stateParams ? stateParams.name : "");
+    const [description, setDescription] = useState(stateParams ? stateParams.description : "");
+    const [unitPrice, setUnitPrice] = useState(stateParams ? stateParams.unit_price : "")
+    const [stockQuantity, setStockQuantity] = useState(stateParams ? stateParams.stock_quantity : "")
+    const [volume, setVolume] = useState(stateParams ? stateParams.volume : "")
+
+
+    const handelSubmit = (event) => {
+        event.preventDefault();
+        // console.log(parseFloat(unitPrice))
+        if (name.trim() != "" && unitPrice != null && parseFloat(unitPrice) > 0 && parseInt(stockQuantity) > 0 && parseInt(volume) > 0) {
+            const submitData = {
+                name: name,
+                description: description,
+                unit_price: unitPrice,
+                stock_quantity: stockQuantity,
+                volume: volume,
+                id: stateParams ? stateParams.id : null
+            }
+            reqSend.defaultReq("POST", 'shop/addproduct/', submitData, responce => {
+                Swal.fire({ title: 'Success!', text: "Changes Applied", icon: 'success', confirmButtonText: 'OK' })
+            },
+                responce => {
+                    Swal.fire({ title: 'Error!', text: responce.data.message, icon: 'error', confirmButtonText: 'OK' })
+                },
+                responce => {
+                    Swal.fire({ title: 'Error!', text: "Something went Wrong", icon: 'error', confirmButtonText: 'OK' })
+                }
+            );
+        } else {
+            Swal.fire({ title: 'Error!', text: "Enter Valied Data", icon: 'error', confirmButtonText: 'OK' })
+        }
+
+
+
+    }
+
+    return (
+        <main>
+            <div className="head-title">
+                <div className="left">
+                    <h1>Add Products</h1>
+                </div>
+
+            </div>
+
+            <div className="table-data " >
+                <div className="order boxShadow1 " >
+                    <div className="d-flex justify-content-center">
+                        <h3 style={{ textAlign: 'center' }}>Add a Product</h3>
+                    </div>
+
+                    <div className='container mt-4'>
+                        <form onSubmit={handelSubmit}>
+                            <div className="row my-3">
+                                <div className="col col-md-6">
+                                    <TextField className='darkThemeText' value={name} required onChange={(e) => { setName(e.target.value) }} name="name" label="Name" variant="outlined" fullWidth />
+
+                                </div>
+                                <div className="col col-md-6">
+                                    <TextField className='darkThemeText' value={volume} required onChange={(e) => { setVolume(e.target.value) }} name="name" label="Product Volume" variant="outlined" fullWidth />
+
+                                </div>
+                            </div>
+                            <div className="row my-3">
+                                <div className="col-12 ">
+                                    <TextField className='darkThemeText' rows={4} multiline value={description} onChange={(e) => { setDescription(e.target.value) }} name="name" label="Description" variant="outlined" fullWidth />
+
+                                </div>
+
+                            </div>
+
+                            <div className="row my-3">
+                                <div className="col col-md-6">
+                                    <TextField className='darkThemeText' value={unitPrice} required onChange={(e) => { setUnitPrice(e.target.value) }} name="name" label="Unit Price(Rs)" variant="outlined" fullWidth />
+
+                                </div>
+                                <div className="col col-md-6">
+                                    <TextField className='darkThemeText' value={stockQuantity} required onChange={(e) => { setStockQuantity(e.target.value) }} name="name" label="Stock Quntity" variant="outlined" fullWidth />
+
+                                </div>
+                            </div>
+
+
+
+                            <div className='row justify-content-center my-5'>
+                                <button
+                                    type='submit'
+
+                                    className='btn btn-md btn-primary' style={{ borderRadius: '50px', maxWidth: '250px' }}>Save Product</button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    )
+}
+
+
 
 
 // store manager 
@@ -242,6 +447,7 @@ export function SentToDilivery(props) {
                     <div className="left">
                         <h1>Sent To Delivery</h1>
                     </div>
+                  
 
                 </div>
 
@@ -418,13 +624,13 @@ export function SeheduleTruck(props) {
 
 
     useEffect(() => {
-        if(route=="default"){
+        if (route == "default") {
             setSelectingData(null)
             setTrucks("default")
             setDrivers("default")
             setAssi("default")
             setValue(dayjs())
-            
+
         }
     }, [route])
 
@@ -439,14 +645,14 @@ export function SeheduleTruck(props) {
 
     const handelSubmit = (event) => {
         event.preventDefault();
-        if (route !="default" && trucks!="default" && assi !="default") {
+        if (route != "default" && trucks != "default" && assi != "default") {
             const submitData = {
-                "date":value,
-                "routeId":route,
-                "truckId":trucks,
-                "driverId":drivers, 
-                "assitantId":assi, 
-                "id":null
+                "date": value,
+                "routeId": route,
+                "truckId": trucks,
+                "driverId": drivers,
+                "assitantId": assi,
+                "id": null
             }
             reqSend.defaultReq("POST", 'control/schedule', submitData, responce => {
                 Swal.fire({ title: 'Success!', text: "Changes Applied", icon: 'success', confirmButtonText: 'OK' })
@@ -542,8 +748,8 @@ export function SeheduleTruck(props) {
                                             }
 
                                             }
-                                          disabled={route=="default"?"disabled":""}
-                                     
+                                            disabled={route == "default" ? "disabled" : ""}
+
                                         />
                                     </LocalizationProvider>
                                 </div>
@@ -630,7 +836,7 @@ export function SeheduleTruck(props) {
 
 export function ViewSchedules(props) {
 
-    const navigate=useNavigate()
+    const navigate = useNavigate()
     const [data, setData] = useState(null);
     const [isComponentChanged, setIsComponentChanged] = useState(false);
     useEffect(() => {
@@ -641,13 +847,13 @@ export function ViewSchedules(props) {
         const formattedDate = `${year}-${month}-${day}`;
 
 
-        reqSend.defaultReq("GET", 'control/schedule/'+formattedDate, {}, (response) => {
+        reqSend.defaultReq("GET", 'control/schedule/' + formattedDate, {}, (response) => {
             const dataR = response.data.results
-            
+
             setData(
                 {
                     name: "Scheduled Trucks",
-                    heading: ["", "Store", "Route","Truck","Date","Time","Add","Remove"],
+                    heading: ["", "Store", "Route", "Truck", "Date", "Time", "Add", "Remove"],
                     body: dataR.map((row, index) => {
                         return (
 
@@ -663,8 +869,8 @@ export function ViewSchedules(props) {
                                 <td>
                                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                                         <motion.p
-                                        onClick={()=>{navigate('/dashboard')}}
-                                            whileHover={{ scale: 1.2, cursor: 'pointer' }} transition={{ delay: 0, duration: 0.05 }}  className="status delivered"  style={{ fontSize: '15px' }}>Add Deliveries</motion.p>
+                                            onClick={() => { navigate('/dashboard') }}
+                                            whileHover={{ scale: 1.2, cursor: 'pointer' }} transition={{ delay: 0, duration: 0.05 }} className="status delivered" style={{ fontSize: '15px' }}>Add Deliveries</motion.p>
                                     </div>
                                 </td>
                                 <td >

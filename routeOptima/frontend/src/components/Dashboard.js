@@ -24,7 +24,7 @@ import {
 } from './_dashBoardData';
 
 import Home from './Home';
-import { ProcessedOrders, SentToDilivery, AddRoute,ViewUsers,SeheduleTruck,ViewSchedules } from './sideComps/SideBarPages';
+import { ProcessedOrders,ViewProducts,AddProducts,SentToDilivery, AddRoute,ViewUsers,SeheduleTruck,ViewSchedules } from './sideComps/SideBarPages';
 // import AddDoctors from './AddDoctors';
 
 
@@ -103,6 +103,8 @@ export default function Dashboard() {
 
                         {/* product manager  */}
                         <Route path="/" element={<Home data={dataAll[localStorage.getItem('role')][1]} />} />
+                        <Route path="/add-products" element={<AddProducts />} />
+                        <Route path="/view-products" element={<ViewProducts />} />
                         <Route path="/processed" element={<ProcessedOrders />} />
 
                         {/* store manager  */}

@@ -35,7 +35,9 @@ router.post('/schedule/truck', checkAuth.checkAuth,orderController.scheduleTruck
 
 router.get('/schedule/:date', checkAuth.checkAuth,orderController.getTruckSchedule); //  get schedules
 
-router.post('/get-available-schedules', checkAuth.checkAuth,orderController.getAvailableSchedules);  
+
+router.post('/peinding-delivery/', checkAuth.checkAuth,orderController.getPendingDelivery);  
+// router.post('/get-available-schedules', checkAuth.checkAuth,orderController.getAvailableSchedules);  
 router.post('/add-dilivery', checkAuth.checkAuth,orderController.addDeliveryToTruck);  
 router.post('/remove-dilivery', checkAuth.checkAuth,orderController.removeDeliveryFromTruck);  
 
