@@ -226,10 +226,10 @@ function addUpdateTruckSchedule(req, res) {
 
 
 function getTruckSchedule(req, res) {
-    dbPool.query("SELECT * FROM truck_schedule WHERE date > NOW();",
+    dbPool.query("SELECT ts.id,r.name,r.store_id,ts.truck_id,CONCAT(DATE(ts.time), '') as date ,TIME(ts.time)  AS `time_local` FROM truck_schedule as ts INNER JOIN route as r ON r.id=ts.route_id WHERE  DATE(ts.time) >="+req.params.date,
         [], (error, results) => {
             if (error) {
-                return res.status(250).json({ message: 'Error' });
+                return res.status(250).json({ message: error });
             } else {
                 return res.status(200).json({ results: results });
             }
@@ -254,7 +254,7 @@ function scheduleRouts(req, res) {
     dbPool.query("SELECT * FROM route WHERE store_id=?",
         [req.body.storeId], (error, results) => {
             if (error) {
-                return res.status(250).json({ message: 'Error' });
+                return res.status(250).json({ message: error });
             } else {
                 return res.status(200).json({ results: results });
             }
@@ -275,7 +275,7 @@ function scheduleTrucks(req, res) {
                 return res.status(250).json({ message: 'Error' });
             } else {
                 const maxTime = results[0].max_time
-                const sql = "SELECT ts.truck_id, ts.driver_user_id, ts.assistant_user_id,ts.time " +
+                const sql = "SELECT DISTINCT(ts.truck_id), ts.driver_user_id, ts.assistant_user_id,ts.time " +
                     "FROM truck_schedule ts " +
                     "JOIN route r ON ts.route_id = r.id " +
                     "WHERE " +
@@ -309,7 +309,7 @@ function scheduleTrucks(req, res) {
                             const date2 = startTime.match(/\d{4}\.\d{2}\.\d{2}/)[0];
                             const query2Promise = new Promise((resolve, reject) => {
                                 dbPool.query(
-                                    "SELECT u.id, d.work_hours FROM truck_schedule AS ts " +
+                                    "SELECT DISTINCT(u.id),u.first_name,u.last_name, d.work_hours FROM truck_schedule AS ts " +
                                     "RIGHT JOIN user AS u ON u.id = ts.driver_user_id " +
                                     "LEFT JOIN driver AS d ON d.user_id = u.id " +
                                     "WHERE (DATE(ts.time) != ? OR ts.time IS NULL) " +
@@ -320,7 +320,7 @@ function scheduleTrucks(req, res) {
                                         if (error) {
                                             resolve();
                                         } else {
-                                            // response['drivers'] = results3;
+                                            response['drivers'] = results3;
                                             resolve();
                                         }
                                     }
@@ -338,7 +338,7 @@ function scheduleTrucks(req, res) {
                                             const assIds = results3.map(result => result.assistant_user_id).join("','");
 
                                             dbPool.query(
-                                                "SELECT u.id, a.work_hours from user as u LEFT JOIN assistant as a  ON a.user_id=u.id WHERE u.id NOT IN('" + assIds + "') AND u.role=6 AND u.status=1 AND (a.work_hours + ? <= 60 OR a.work_hours IS NULL)",
+                                                "SELECT DISTINCT(u.id),u.first_name,u.last_name, a.work_hours from user as u LEFT JOIN assistant as a  ON a.user_id=u.id WHERE u.id NOT IN('" + assIds + "') AND u.role=6 AND u.status=1 AND (a.work_hours + ? <= 60 OR a.work_hours IS NULL)",
                                                 [maxTime],
                                                 (error, results4) => {
                                                     if (error) {
@@ -374,6 +374,58 @@ function scheduleTrucks(req, res) {
 
 
 
+function getPendingDelivery(req,res){
+
+    dbPool.query("SELECT o.id,o.quntity ,o.quntity*p.volume as volume ,o.order_date,u.first_name,p.name as product_name FROM order_product as o   INNER JOIN product as p ON p.id=o.product_id INNER JOIN user as u ON u.id=o.user_id WHERE  o.shipped=1 AND o.delevered=0 AND o.completd=0",
+    [], (error, results) => {
+        if (error) {
+            return res.status(250).json({ message: error });
+        } else {
+            return res.status(200).json({ results: results });
+        }
+    })
+}
+
+
+function getAvailableSchedules(req,res){
+     const {routeId,volume} = req.body
+    dbPool.query("SELECT ts.id,ts.truck_id,t.max_capacity,ts.current_capacity FROM truck_schedule AS ts INNER JOIN truck AS t ON ts.truck_id=t.id ts.route_id=? AND ts.current_capacity+? <=t.max_capacity",
+    [routeId,volume], (error, results) => {
+        if (error) {
+            return res.status(250).json({ message: error });
+        } else {
+            return res.status(200).json({ results: results });
+        }
+    })
+}
+
+
+
+function addDeliveryToTruck(req,res){
+    const {scheduleId,productId} = req.body
+   dbPool.query("INSERT INTO `truck_delivery`(`order_product_id`, `truck_schedule_id`) VALUES (?,?)",
+   [productId,scheduleId], (error, results) => {
+       if (error) {
+           return res.status(250).json({ message: error });
+       } else {
+           return res.status(200).json({ message: "Successfully Inserted" });
+       }
+   })
+}
+
+
+function removeDeliveryFromTruck(req,res){
+    const {productId} = req.body
+   dbPool.query("DELETE FROM `truck_delivery` WHERE order_product_id=?",
+   [productId], (error, results) => {
+       if (error) {
+           return res.status(250).json({ message: error });
+       } else {
+           return res.status(200).json({ message: "Successfully Removed" });
+       }
+   })
+}
+
 
 
 
@@ -398,8 +450,12 @@ module.exports = {
     addUpdateTruckSchedule,
     getTruckSchedule,
     deleteTruckSchedule,
+    getPendingDelivery,
 
     scheduleRouts,
     scheduleTrucks,
 
+    getAvailableSchedules,
+    addDeliveryToTruck,
+    removeDeliveryFromTruck
 } 

@@ -17,7 +17,7 @@ export function defaultReq(method,url,data,callback1=null,callback2=null,callbac
     };
 
     axios.request(options).then(function (response) {
-       
+      
         if (response.status === 200 || response.status === 201) {
             if(callback1){
                 callback1(response);

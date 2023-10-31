@@ -8,6 +8,9 @@ import {
     dashboardAdminData,
     dashboardAdminOverview,
 
+    dashboardDeliveryManagerData,
+    dashboardDeliveryManagerOverview,
+
     dashboardStoreManagerData,
     dashboardStoreManagerOverview,
 
@@ -16,10 +19,12 @@ import {
 
     dashboardRouteManagerData,
     dashboardRouteManagerOverview,
+
+
 } from './_dashBoardData';
 
 import Home from './Home';
-import { ProcessedOrders, SentToDilivery, AddRoute,ViewUsers } from './sideComps/SideBarPages';
+import { ProcessedOrders, SentToDilivery, AddRoute,ViewUsers,SeheduleTruck,ViewSchedules } from './sideComps/SideBarPages';
 // import AddDoctors from './AddDoctors';
 
 
@@ -27,6 +32,7 @@ import { ProcessedOrders, SentToDilivery, AddRoute,ViewUsers } from './sideComps
 const dataAll = {
     'admin': [dashboardAdminData, dashboardAdminOverview],
     '1': [dashboardStoreManagerData, dashboardStoreManagerOverview],
+    '2':[dashboardDeliveryManagerData,dashboardDeliveryManagerOverview],
     '3': [dashboardRouteManagerData, dashboardRouteManagerOverview],
     '4': [dashboardProductManagerData, dashboardProductManagerOverview],
 
@@ -106,6 +112,11 @@ export default function Dashboard() {
 
                         {/* route manager  */}
                         <Route path="/add-route" element={<AddRoute />} />
+
+
+                        {/* delivery manager  */}
+                        <Route path="/schedule-trucks" element={<SeheduleTruck />} />
+                        <Route path="/view-schedules" element={<ViewSchedules />} />
 
 
                     </Routes>

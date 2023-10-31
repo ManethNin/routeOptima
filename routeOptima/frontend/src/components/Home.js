@@ -6,7 +6,8 @@ import { motion } from 'framer-motion';
 import { storeData, userRoles } from './_dashBoardData';
 import { Table } from "./sideComps/dashBoardComps";
 import { useNavigate } from "react-router-dom";
-
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import { personImages } from "./_dashBoardData";
 
 
@@ -61,7 +62,13 @@ export default function Home(props) {
 
                     return <StoreManagerHome isComponentChanged={isComponentChanged} setIsComponentChanged={setIsComponentChanged} />
 
-                } else if (localStorage.getItem('role') == '3') {
+                } else if (localStorage.getItem('role') == '2') {
+
+                    return <DeliveryManagerHome isComponentChanged={isComponentChanged} setIsComponentChanged={setIsComponentChanged} />
+
+                }
+
+                else if (localStorage.getItem('role') == '3') {
 
                     return <RouteManagerHome isComponentChanged={isComponentChanged} setIsComponentChanged={setIsComponentChanged} />
 
@@ -98,7 +105,7 @@ function AdminHome(props) {
                                 <td></td>
                                 <td >
                                     <div className="d-flex justify-content-center">
-                                        <img src={personImages[index%personImages.length]} />
+                                        <img src={personImages[index % personImages.length]} />
                                         <p>{row.first_name + " " + row.last_name}</p>
                                     </div>
                                 </td>
@@ -187,7 +194,7 @@ function ProductManagerHome(props) {
 
                                 <td >
                                     <div className="d-flex justify-content-center">
-                                        <img src={personImages[index%personImages.length]} />
+                                        <img src={personImages[index % personImages.length]} />
                                         <p>{row.first_name}</p>
                                     </div>
                                 </td>
@@ -269,7 +276,7 @@ function StoreManagerHome(props) {
 
                                 <td >
                                     <div className="d-flex justify-content-center">
-                                        <img src={personImages[index%personImages.length]} />
+                                        <img src={personImages[index % personImages.length]} />
                                         <p>{row.first_name}</p>
                                     </div>
                                 </td>
@@ -404,6 +411,93 @@ function RouteManagerHome(props) {
         </>
     )
 }
+
+
+
+
+function DeliveryManagerHome(props) {
+    const [data, setData] = useState(null);
+
+    useEffect(() => {
+
+        reqSend.defaultReq("POST", 'control/peinding-delivery', {
+
+        }, (response) => {
+            const dataR = response.data.results
+
+            setData(
+                {
+                    name: "Pending Delivery",
+                    heading: ["", "ID", "Product Name", "Quntity", "Volume", "Order Date", "Name", "Select Scheduled Truck", "Status"],
+                    body: dataR.map((row, index) => {
+                        const onlyDate = new Date(row.order_date).toISOString().split('T')[0].replace(/-/g, '.')
+                        return (
+
+                            <tr key={index}>
+                                <td></td>
+                                <td>{row.id}</td>
+                                <td>{row.product_name}</td>
+                                <td>{row.quntity}</td>
+                                <td>{row.volume}</td>
+                                <td>{onlyDate}</td>
+
+                                <td >
+                                    <div className="d-flex justify-content-center">
+                                        <img src={personImages[index % personImages.length]} />
+                                        <p>{row.first_name}</p>
+                                    </div>
+                                </td>
+                                <td >
+                                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                        {/* <Select
+                                            labelId="demo-simple-select-label"
+                                            id="demo-simple-select" value={truck} label="Store" onChange={(e) => { setTruck(e.target.value) }} fullWidth
+                                        >
+                                            <MenuItem value={"default"}>Select Truck</MenuItem>
+                                            {selectingData.drivers.map((val, index) => {
+
+                                                return (
+                                                    <MenuItem key={index} value={val.id}>{val.first_name + " " + val.last_name + " (Work hours - " + (val.work_hours ? val.work_hours : 0) + ")"}</MenuItem>
+                                                )
+                                            })}
+                                        </Select> */}
+                                    </div>
+
+                                </td>
+
+                                <td >
+                                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                        <motion.p
+                                            onClick={() => {
+                                                reqSend.swalFireReq1("POST", 'control/mark-as-shipped', { id: row.id },
+                                                    "Added To Dilivery.Mark As Shipped", "Error While Adding.", (response) => {
+                                                        props.setIsComponentChanged(!props.isComponentChanged)
+                                                    }, "Error! Check Your Connection");
+                                            }}
+                                            whileHover={{ scale: 1.2, cursor: 'pointer' }} transition={{ delay: 0, duration: 0.05 }} className="status delivered" style={{ fontSize: '15px' }}>Add To Dilivery</motion.p>
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        )
+                    })
+                }
+
+            )
+        });
+
+
+    }, [props.isComponentChanged])
+    return (
+        <>
+            {data ? <Table data={data} /> : null}
+        </>
+    )
+}
+
+
 
 
 

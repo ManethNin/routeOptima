@@ -91,6 +91,8 @@ export const dashboardStoreManagerOverview = {
 
 
 
+
+
 // route manager 
 
 export const dashboardRouteManagerData = [
@@ -109,6 +111,29 @@ export const dashboardRouteManagerOverview = {
     "btnText": "Add Route",
     "btnLink": "add-route"
 }
+
+
+
+
+
+export const dashboardDeliveryManagerData = [
+    { name: "Dashboard", icon: <i className='bx bxs-dashboard' ></i>, active: true, to: '/dashboard' },
+    { name: "Schedule Truck", icon: <i className='bx bx-task'></i>, active: false, to: '/dashboard/schedule-trucks' },
+    { name: "View Schedules", icon: <i className='bx bx-task'></i>, active: false, to: '/dashboard/view-schedules' },
+    { name: "View Deliveries", icon: <i className='bx bx-task'></i>, active: false, to: '/dashboard/view-deliveries' },
+]
+
+export const dashboardDeliveryManagerOverview = {
+    "summary": [
+        { name: "Pending Orders", icon: <i className='bx bxs-group' ></i>, key: 'pendingOrders' },
+        { name: "Total Store Managers", icon: <i className='bx bxs-group' ></i>, key: 'totalSmanagers' },
+        { name: "Total Delevery Managers", icon: <i className='bx bxs-group' ></i>, key: 'totalDmanagers' },
+
+    ],
+    "btnText": "Schedule Truck",
+    "btnLink": "schedule-trucks"
+}
+
 
 
 
