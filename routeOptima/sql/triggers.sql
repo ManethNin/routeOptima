@@ -34,6 +34,27 @@ DELIMITER ;
 
 
 
+-- set dilivered after adding to dilivery 
+DELIMITER //
+CREATE TRIGGER update_order_product_delevered
+AFTER INSERT ON truck_delivery
+FOR EACH ROW
+BEGIN
+  UPDATE order_product
+  SET delevered = 1
+  WHERE id = NEW.order_product_id;
+END;
+//
+DELIMITER ;
+
+
+
+
+
+
+
+
+
 
 
 

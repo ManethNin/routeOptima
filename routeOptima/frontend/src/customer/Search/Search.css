@@ -1,0 +1,31 @@
+.search-bar {
+  padding: 20px 15% 0.02px 15%;
+  background: rgba(227, 226, 217, 0.545);
+  margin-bottom: 30px;
+}
+
+.dropdown {
+  padding: 0px 15px;
+  background: rgb(233, 232, 226);
+  margin-bottom: 30px;
+  border-radius: 10px;
+  width: 100%;
+}
+
+.dropdown-row {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.165);
+  padding: 10px 10px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+
+.dropdown-row:hover {
+  background: rgba(0, 0, 0, 0.015);
+}
+
+.title {
+  margin-left: 10px;
+}

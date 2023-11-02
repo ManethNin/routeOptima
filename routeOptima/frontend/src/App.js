@@ -6,14 +6,14 @@ import './App.css';
 
 
 
-import {Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 
 import LoginNew from './components/login/LoginNew';
 import RegisterNew from './components/login/RegisterNew';
 import Topbar from './components/main/Topbar';
 import Dashboard from './components/Dashboard';
-
+// import {Navigation} from './customer/Navigation/Navigation';
 
 
 function App() {
@@ -28,6 +28,7 @@ function App() {
                         <>
                             <div>
                                 <Topbar />
+                                {/* <Navigation /> */}
                                 {/* other elements goes here  */}
                             </div>
                         </>
