@@ -1,0 +1,41 @@
+.menu {
+    display: none;
+}
+
+.links {
+    display: flex;
+}
+
+.links a {
+    font-size: 0.85rem;
+}
+.login-btn {
+    font-size: 0.85rem;
+}
+
+.switch-link {
+    text-align: center;
+}
+
+.switch-link a{
+    cursor: pointer;
+}
+
+.form {
+    width: 250px;
+}
+
+@media (max-width: 600px) {
+    .menu {
+        display: block;
+    }
+    .links {
+        display: none;
+    }
+}
+
+@media (max-width: 250px) {
+    .form {
+        width: auto;
+    }
+}

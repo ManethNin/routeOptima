@@ -160,7 +160,7 @@ function login(req, res) {
 
 function getUsers(req, res) {
     const { start, end,status } = req.body;
-    const sql="SELECT `id`, `name`, `email`, `first_name`, `last_name`, `address`, `country`, `role`,`store_id` FROM `user` WHERE status= ? AND role BETWEEN ? and ?  ORDER BY role ASC "
+    const sql="SELECT `id`, `email`, `first_name`, `last_name`, `address`, `country`, `role`,`store_id` FROM `user` WHERE status= ? AND role BETWEEN ? and ?  ORDER BY role ASC "
     dbPool.query(sql, [status,start,end], (error, results) => {
         if (error) {
             return res.status(250).json({ message: error });

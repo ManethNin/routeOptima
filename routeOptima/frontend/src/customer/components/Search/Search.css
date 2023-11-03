@@ -21,6 +21,11 @@
   border-radius: 10px;
 }
 
+.close-icon {
+  cursor: pointer;
+  color: gray;
+}
+
 
 .dropdown-row:hover {
   background: rgba(0, 0, 0, 0.015);

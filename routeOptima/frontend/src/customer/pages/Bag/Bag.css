@@ -9,6 +9,7 @@
 
 .bag-list {
     margin: 20px 15%;
+    min-height: 30vh;
 }
 
 .quantity button {

@@ -1,9 +1,149 @@
-const sizes = [
-  3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12,
-  12.5, 13,
+import * as reqSend from './reqSender';
+import React, { useState, useEffect } from "react";
+
+
+
+export const storeData =[
+  ["STOR_1", "Colombo"],
+  ["STOR_2", "Negombo"],
+  ["STOR_3", "Galle"],
+  ["STOR_4", "Matara"],
+  ["STOR_5", "Jaffna"],
+  ["STOR_6", "Trinco"]
+]
+
+
+const quantity_list = [
+  {
+    model_id: 1,
+    quantity: 10,
+    size: 5,
+  },
+  {
+    model_id: 1,
+    quantity: 10,
+    size: 5.5,
+  },
+  {
+    model_id: 1,
+    quantity: 10,
+    size: 7,
+  },
+  {
+    model_id: 1,
+    quantity: 10,
+    size: 8,
+  },
+
+  {
+    model_id: 0,
+    quantity: 10,
+    size: 5,
+  },
+  {
+    model_id: 0,
+    quantity: 10,
+    size: 5.5,
+  },
+  {
+    model_id: 0,
+    quantity: 10,
+    size: 7,
+  },
+  {
+    model_id: 0,
+    quantity: 10,
+    size: 8,
+  },
+
+  {
+    model_id: 2,
+    quantity: 10,
+    size: 5,
+  },
+  {
+    model_id: 2,
+    quantity: 10,
+    size: 5.5,
+  },
+  {
+    model_id: 2,
+    quantity: 10,
+    size: 7,
+  },
+  {
+    model_id: 2,
+    quantity: 10,
+    size: 8,
+  },
+
+  {
+    model_id: 3,
+    quantity: 10,
+    size: 5,
+  },
+  {
+    model_id: 3,
+    quantity: 10,
+    size: 5.5,
+  },
+  {
+    model_id: 3,
+    quantity: 10,
+    size: 7,
+  },
+  {
+    model_id: 3,
+    quantity: 10,
+    size: 8,
+  },
+
+  {
+    model_id: 4,
+    quantity: 10,
+    size: 5,
+  },
+  {
+    model_id: 4,
+    quantity: 10,
+    size: 5.5,
+  },
+  {
+    model_id: 4,
+    quantity: 10,
+    size: 7,
+  },
+  {
+    model_id: 4,
+    quantity: 10,
+    size: 8,
+  },
+
+  {
+    model_id: 5,
+    quantity: 10,
+    size: 5,
+  },
+  {
+    model_id: 5,
+    quantity: 10,
+    size: 5.5,
+  },
+  {
+    model_id: 5,
+    quantity: 10,
+    size: 7,
+  },
+  {
+    model_id: 5,
+    quantity: 10,
+    size: 8,
+  },
 ];
 
-const list = [
+
+
+const model_list = [
   {
     title: "SWIFT RUN 22 SHOES",
     img: "https://assets.adidas.com/images/w_1880,f_auto,q_auto/ff05916714994acda510ad6500abf565_9366/GZ3496_01_standard.jpg",
@@ -92,4 +232,7 @@ const list = [
   },
 ];
 
-export {list, sizes};
+const brands = ["adidas", "nike", "puma", "vans"];
+const colors = ["black", "white", "pink", "blue", "red", "purple"];
+
+export { model_list, quantity_list, brands, colors };

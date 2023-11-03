@@ -366,7 +366,7 @@ export function AddProducts(props) {
                                 <button
                                     type='submit'
 
-                                    className='btn btn-md btn-primary' style={{ borderRadius: '50px', maxWidth: '250px' }}>Save Product</button>
+                                    className='btn btn-md btn-primary' style={{ borderRadius: '50px', maxWidth: '250px',minHeight:'50px' }}>Save Product</button>
                             </div>
                         </form>
                     </div>
@@ -578,7 +578,7 @@ export function AddRoute(props) {
                                 <button
                                     type='submit'
 
-                                    className='btn btn-md btn-primary' style={{ borderRadius: '50px', maxWidth: '250px' }}>Save Route</button>
+                                    className='btn btn-md btn-primary' style={{ borderRadius: '50px', maxWidth: '250px',minHeight:'50px' }}>Save Route</button>
                             </div>
                         </form>
                     </div>
@@ -818,7 +818,7 @@ export function SeheduleTruck(props) {
                                 <button
                                     type='submit'
 
-                                    className='btn btn-md btn-primary' style={{ borderRadius: '50px', maxWidth: '250px' }}>Save Route</button>
+                                    className='btn btn-md btn-primary' style={{ borderRadius: '50px', maxWidth: '250px',minHeight:'50px' }}>Save Route</button>
                             </div>
                         </form>
                     </div>

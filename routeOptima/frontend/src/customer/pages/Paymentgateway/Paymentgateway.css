@@ -13,4 +13,5 @@ h1 {
 
 .btn {
     margin-left: 15%;
+    min-height: 37vh;
 }

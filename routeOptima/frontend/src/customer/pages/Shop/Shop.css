@@ -29,6 +29,7 @@
 .product-section {
   display: flex;
   margin: auto 15%;
+
 }
 
 .filter-section {
@@ -71,9 +72,20 @@ h1 {
 
 .no-item {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
+}
+
+.no-item-icon {
+  font-size: 10rem;
+  font-weight: 50;
+  color: grey;
+}
+
+.no-item p {
+  padding: 20px;
 }
 
 .modal-body {
@@ -175,4 +187,9 @@ h1 {
     align-items: center;
     width: 100%;
   }
+}
+
+
+.opacityincrease{
+  opacity: 1 !important;
 }

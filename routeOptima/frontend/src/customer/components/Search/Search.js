@@ -12,17 +12,18 @@ import {
 } from "@nextui-org/react";
 
 import { FiSearch } from "react-icons/fi";
+import { IoCloseCircleOutline } from "react-icons/io5"
 import { ShopContext } from "../../context/shopContextProvider";
 
-import { sizes, list } from "../../data/data";
+import { model_list } from "../../data/data";
 
 export const Search = () => {
   const [value, setValue] = React.useState("");
-  const { search, addToBag } = useContext(ShopContext);
+  const { search, addToBag, getAvailableSizes } = useContext(ShopContext);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-  const [selectedItem, setselectedItem] = React.useState(list[0]);
-  const [selectedSize, setSelectedSize] = React.useState([7]);
+  const [selectedItem, setselectedItem] = React.useState(model_list[0]);
+  const [selectedSize, setSelectedSize] = React.useState(7);
 
   const handleOpen = (item) => {
     setselectedItem(item);
@@ -45,15 +46,21 @@ export const Search = () => {
         labelPlacement="outside"
         value={value}
         onChange={(e) => handleSearch(e.target.value)}
-        endContent={
+        startContent={
           <FiSearch
             onClick={() => onsearch(value)}
             className="text-2xl text-default-400 pointer-events-none flex-shrink-0"
           />
         }
+        endContent={
+          value !== "" ?
+          <IoCloseCircleOutline className="close-icon" onClick={(e) => handleSearch("")}/>
+          : <p></p>
+        }
       />
+      
       <div className="dropdown">
-        {list
+        {model_list
           .filter((item) => {
             const searchItem = value.toLowerCase();
             const product_name = item.title.toLowerCase();
@@ -67,11 +74,8 @@ export const Search = () => {
               className="dropdown-row"
               onClick={() => handleOpen(item)}
             >
-              <Image width={100} height={100} alt={item.title} src={item.img} />
-              <div
-                key={index}
-                className="title"
-              >
+              <img width={100} height={100} alt={item.title} src={item.img} />
+              <div key={index} className="title">
                 {item.title}
               </div>
             </div>
@@ -83,7 +87,7 @@ export const Search = () => {
                 <ModalBody>
                   <div className="modal-body">
                     <div className="modal-img">
-                      <Image
+                      <img
                         width={300}
                         height={200}
                         alt={selectedItem.title}
@@ -126,21 +130,42 @@ export const Search = () => {
                                 setSelectedSize(e.target.value);
                               }}
                             >
-                              {sizes.map((size) => (
-                                <option key={size} value={size}>
-                                  {size}
-                                </option>
-                              ))}
+                              {getAvailableSizes(selectedItem.id).map(
+                                (size) => (
+                                  <option key={size} value={size}>
+                                    {size}
+                                  </option>
+                                )
+                              )}
                             </select>
                           </div>
                         </div>
 
                         <Button
-                        onClick={() => {addToBag(selectedItem.id, selectedItem.title, selectedItem.img, selectedSize, selectedItem.color, selectedItem.description, selectedItem.brand, selectedItem.price, selectedItem.gender); onClose()}}
-                        fullWidth
-                      >
-                        Add to Bag
-                      </Button>
+                          // isDisabled={
+                          //   getAvailableSizes(selectedItem.id).length === 0
+                          // }
+                          onClick={() => {
+                            addToBag(
+                              selectedItem.id,
+                              selectedItem.title,
+                              selectedItem.img,
+                              selectedSize,
+                              selectedItem.color,
+                              selectedItem.description,
+                              selectedItem.brand,
+                              selectedItem.price,
+                              selectedItem.gender
+                            );
+                            onClose();
+                          }}
+                          fullWidth
+                        >
+                          Add to Bag
+                          {/* {getAvailableSizes(selectedItem.id).length === 0
+                            ? "Out of Stock"
+                            : "Add to Bag"} */}
+                        </Button>
                       </div>
                     </div>
                   </div>

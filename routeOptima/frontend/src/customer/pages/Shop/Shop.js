@@ -1,5 +1,6 @@
-import React, { useContext } from "react";
+import React, { useContext,useEffect,useState } from "react";
 import "./Shop.css";
+import * as reqSend from '../../data/reqSender'
 
 import { ShopContext } from "../../context/shopContextProvider";
 
@@ -19,26 +20,41 @@ import {
   useDisclosure,
   Textarea,
 } from "@nextui-org/react";
+
 import { Search } from "../../components/Search/Search";
-import { sizes, list } from "../../data/data";
+import { model_list, colors, brands } from "../../data/data";
 import { Navigation } from "../../components/Navigation/Navigation";
+import { TbPackageOff } from "react-icons/tb"
 
 export const Shop = () => {
-  const [filterList, setFilterList] = React.useState(
-    list.sort((a, b) => a.title.localeCompare(b.title))
-  );
+
+  const [filterList, setFilterList] = React.useState([]);
+  const [data, setData] = React.useState([]);
+
+
+  
+  useEffect(() => {
+  
+    reqSend.defaultReq("GET", 'shop/get-all-products',{} ,responce => {
+      setFilterList(responce.data.results.sort((a, b) => a.title.localeCompare(b.title)))
+      setData(responce.data.results)
+    });
+  }, [])
+
+ 
+
   const [selectedGender, setSelectedGender] = React.useState("all");
   const [selectedColor, setSelectedColor] = React.useState("all");
   const [selectedBrand, setSelectedBrand] = React.useState("all");
   const [sortByMethod, setSortByMethod] = React.useState("name");
   const [screenWidth, setScreenWidth] = React.useState(window.innerWidth);
-  const [selectedSize, setSelectedSize] = React.useState([7]);
+  const [selectedSize, setSelectedSize] = React.useState(7);
 
-  const { addToBag } =
+  const { addToBag, getAvailableSizes } =
     useContext(ShopContext);
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [selectedItem, setselectedItem] = React.useState(list[0]);
+  const [selectedItem, setselectedItem] = React.useState({});
 
   const handleOpen = (item) => {
     setselectedItem(item);
@@ -71,7 +87,7 @@ export const Shop = () => {
 
   const handleBrandCategory = (brand) => {
     setSelectedBrand(brand);
-    const filteredItems = list.filter(
+    const filteredItems = data.filter(
       (item) =>
         (item.brand === brand || brand === "all") &&
         (selectedColor === "all" || item.color === selectedColor) &&
@@ -82,7 +98,7 @@ export const Shop = () => {
 
   const handleGenderCategory = (gender) => {
     setSelectedGender(gender);
-    const filteredItems = list.filter(
+    const filteredItems = data.filter(
       (item) =>
         (item.gender === gender || gender === "all") &&
         (selectedColor === "all" ? true : item.color === selectedColor) &&
@@ -93,7 +109,7 @@ export const Shop = () => {
 
   const handleColorCategory = (color) => {
     setSelectedColor(color);
-    const filteredItems = list.filter(
+    const filteredItems = data.filter(
       (item) =>
         (item.color === color || color === "all") &&
         (selectedGender === "all" ? true : item.gender === selectedGender) &&
@@ -101,6 +117,7 @@ export const Shop = () => {
     );
     handleSortBy(sortByMethod, filteredItems);
   };
+
 
   return (
     <>
@@ -121,7 +138,7 @@ export const Shop = () => {
             selectionMode="single"
           >
             <SelectItem key={"name"}>Name</SelectItem>
-            <SelectItem key={"highlow"}>Price hight to low</SelectItem>
+            <SelectItem key={"highlow"}>Price high to low</SelectItem>
             <SelectItem key={"lowhigh"}>Price low to high</SelectItem>
           </Select>
         </div>
@@ -150,11 +167,7 @@ export const Shop = () => {
               onChange={(e) => handleColorCategory(e.target.value)}
             >
               <Radio value="all">All</Radio>
-              <Radio value="black">Black</Radio>
-              <Radio value="white">White</Radio>
-              <Radio value="brown">Brown</Radio>
-              <Radio value="purple">Purple</Radio>
-              <Radio value="pink">Pink</Radio>
+              {colors.map((color_name, index) => <Radio key={index} value={color_name}>{color_name.charAt(0).toUpperCase() + color_name.slice(1)}</Radio>)}
             </RadioGroup>
           </div>
 
@@ -166,10 +179,7 @@ export const Shop = () => {
               onChange={(e) => handleBrandCategory(e.target.value)}
             >
               <Radio value="all">All</Radio>
-              <Radio value="adidas">Adidas</Radio>
-              <Radio value="nike">Nike</Radio>
-              <Radio value="puma">Puma</Radio>
-              <Radio value="vans">Vans</Radio>
+              {brands.map((brand_name, index) => <Radio key={index} value={brand_name}>{brand_name.charAt(0).toUpperCase() + brand_name.slice(1)}</Radio>)}
             </RadioGroup>
           </div>
         </div>
@@ -185,13 +195,14 @@ export const Shop = () => {
                 isFooterBlurred
               >
                 <CardBody className="overflow-visible p-0">
-                  <Image
+                  <img
+            
                     isZoomed
                     shadow="sm"
                     radius="lg"
                     width="100%"
                     alt={item.title}
-                    className="w-full object-cover h-[140px]"
+                    className="w-full object-cover h-[140px] opacityincrease"
                     src={item.img}
                   />
                 </CardBody>
@@ -214,6 +225,7 @@ export const Shop = () => {
           </div>
         ) : (
           <div className="no-item">
+            <TbPackageOff className="no-item-icon"/>
             <p>No items available in the selected category.</p>
           </div>
         )}
@@ -226,7 +238,7 @@ export const Shop = () => {
               <ModalBody>
                 <div className="modal-body">
                   <div className="modal-img">
-                    <Image
+                    <img
                       width={300}
                       height={200}
                       alt={selectedItem.t}
@@ -271,7 +283,7 @@ export const Shop = () => {
                               setSelectedSize(e.target.value);
                             }}
                           >
-                            {sizes.map((size) => (
+                            {getAvailableSizes(selectedItem.id).map((size) => (
                               <option key={size} value={size}>
                                 {size}
                               </option>
@@ -281,10 +293,12 @@ export const Shop = () => {
                       </div>
 
                       <Button
+                        // isDisabled={getAvailableSizes(selectedItem.id).length === 0}
                         onClick={() => {addToBag(selectedItem.id, selectedItem.title, selectedItem.img, selectedSize, selectedItem.color, selectedItem.description, selectedItem.brand, selectedItem.price, selectedItem.gender); onClose()}}
                         fullWidth
                       >
                         Add to Bag
+                        {/* {getAvailableSizes(selectedItem.id).length === 0 ? "Out of Stock" : "Add to Bag"} */}
                       </Button>
                     </div>
                   </div>

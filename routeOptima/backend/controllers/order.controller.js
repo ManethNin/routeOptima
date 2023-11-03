@@ -196,6 +196,7 @@ function addUpdateTruckSchedule(req, res) {
         dbPool.query("UPDATE `truck_schedule` SET `truck_id`=?,`driver_user_id`=?,`assistant_user_id`=?,`route_id`=?,`time`=? WHERE id=?",
             [truckId, driverId, assitantId, routeId, date, id], (error, results) => {
                 if (error) {
+                    console.log(error)
                     return res.status(250).json({ message: 'Error' });
                 } else {
                     return res.status(201).json({ message: "Changes Applied" });
@@ -211,6 +212,8 @@ function addUpdateTruckSchedule(req, res) {
         dbPool.query("INSERT INTO `truck_schedule`(`id`, `truck_id`, `driver_user_id`, `assistant_user_id`,`route_id`, `time`) VALUES (?,?,?,?,?,?)",
             [idNew, truckId, driverId, assitantId, routeId, date], (error, results) => {
                 if (error) {
+                    console.log(error)
+                    console.log(error)
                     return res.status(250).json({ message: 'Error' });
                 } else {
                     return res.status(201).json({ message: "Successflly Created" });
@@ -309,19 +312,29 @@ function scheduleTrucks(req, res) {
                             const date2 = startTime.match(/\d{4}\.\d{2}\.\d{2}/)[0];
                             const query2Promise = new Promise((resolve, reject) => {
                                 dbPool.query(
-                                    "SELECT DISTINCT(u.id),u.first_name,u.last_name, d.work_hours FROM truck_schedule AS ts " +
-                                    "RIGHT JOIN user AS u ON u.id = ts.driver_user_id " +
-                                    "LEFT JOIN driver AS d ON d.user_id = u.id " +
-                                    "WHERE (DATE(ts.time) != ? OR ts.time IS NULL) " +
-                                    "AND u.role = 5 AND u.status = 1 AND " +
-                                    "(d.work_hours + ? <= 40 OR d.work_hours IS NULL)",
-                                    [date2, maxTime],
+                                    "SELECT driver_user_id FROM truck_schedule WHERE DATE(`time`) = ?  GROUP BY driver_user_id HAVING COUNT(id) >=1",
+                                    [date2],
                                     (error, results3) => {
+
                                         if (error) {
                                             resolve();
                                         } else {
-                                            response['drivers'] = results3;
-                                            resolve();
+                                            const assIds = results3.map(result => result.driver_user_id).join("','");
+                                              
+                                            dbPool.query(
+                                                "SELECT DISTINCT(u.id),u.first_name,u.last_name, a.work_hours from user as u LEFT JOIN driver as a  ON a.user_id=u.id WHERE u.id NOT IN('" + assIds + "') AND u.role=5 AND u.status=1 AND (a.work_hours + ? <= 60 OR a.work_hours IS NULL)",
+                                                [maxTime],
+                                                (error, results4) => {
+                                                    if (error) {
+                                                        resolve();
+                                                    } else {
+                                                        response['drivers'] = results4;
+                                                        // console.log(results4)
+                                                        resolve();
+
+                                                    }
+                                                }
+                                            );
                                         }
                                     }
                                 );
@@ -381,30 +394,30 @@ function getPendingDelivery(req, res) {
             if (error) {
                 return res.status(250).json({ message: error });
             } else {
-               
+
                 const promiseArray = results.map(element => {
                     return new Promise((resolve, reject) => {
-                       
+
                         dbPool.query("SELECT ts.id,ts.truck_id,t.max_capacity,ts.current_capacity,CONCAT(DATE(ts.time), ' ',TIME(ts.time)) as time FROM truck_schedule AS ts INNER JOIN truck AS t ON ts.truck_id=t.id WHERE ts.route_id=? AND ts.current_capacity+? <=t.max_capacity",
                             [element.route_id, element.volume], (error, results2) => {
                                 if (error) {
                                     resolve()
                                 } else {
-                                    
-                                    element['truck_schedules']=results2 
+
+                                    element['truck_schedules'] = results2
                                     resolve()
-                                    
+
                                 }
                             })
-                    
-                            
-                            
-                        })
-                    
+
+
+
+                    })
+
                 });
                 Promise.all(promiseArray)
                     .then(() => {
-                        
+
                         return res.status(200).json({ results: results });
                     })
                     .catch(err => {
@@ -471,7 +484,7 @@ module.exports = {
     scheduleRouts,
     scheduleTrucks,
 
-  
+
     addDeliveryToTruck,
     removeDeliveryFromTruck
 } 

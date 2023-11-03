@@ -1,0 +1,10 @@
+.products-container {
+  margin: 0px 30px;
+  margin-bottom: 20px;
+}
+
+.add-btn-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 30px;
+}

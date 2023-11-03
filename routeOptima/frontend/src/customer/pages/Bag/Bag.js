@@ -1,5 +1,7 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import "./Bag.css";
+import * as reqSend from '../../data/reqSender'
+import { storeData } from "../../data/data";
 
 import {
   Table,
@@ -8,52 +10,67 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Card,
-  CardBody,
-  CardFooter,
-  Input,
   Image,
   Button,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+  Input,
   Select,
   SelectItem,
 } from "@nextui-org/react";
 
-import { AiFillMinusSquare } from "react-icons/ai";
-import { AiFillPlusSquare } from "react-icons/ai";
-import { FiSearch } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { Search } from "../../components/Search/Search";
 import { ShopContext } from "../../context/shopContextProvider";
-
-import { sizes, list } from "../../data/data";
 import { Navigation } from "../../components/Navigation/Navigation";
 
 export const Bag = () => {
-  const {
-    addToCart,
-    cartItems,
-    removeFromCart,
-    cartItemSizes,
-    cahngeSize,
-    bagItems,
-    addToBag,
-    removeFromBag,
-    changeSize,
-  } = useContext(ShopContext);
+  const [store, setStore] = React.useState(null);
+  const [route, setRoute] = React.useState(null);
+  const [routes, setRoutes] = React.useState(null);
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const isUserLogged = React.useMemo(
+    () => localStorage.getItem("AUTHKEY") ? true : false,
+    []
+  );
+
+
+  useEffect(() => {
+
+    if (store) {
+      reqSend.defaultReq("POST", 'shop/get-routs', { store_id: store }, responce => {
+        setRoutes(responce.data.results)
+
+      });
+    }
+  }, [store])
+
+
+
+
+
+  const { bagItems, addToBag, removeFromBag, changeSize, getAvailableSizes } =
+    useContext(ShopContext);
 
   const getTot = () => {
-    let sum = 0;
-    bagItems.map((item) => {
-      sum += item.price * item.quantity;
-    });
+    const sum = bagItems.reduce((accumulator, item) => {
+      return accumulator + item.price * item.quantity;
+    }, 0);
+
     return sum;
   };
+
+  // {console.log(bagItems)}
   return (
     <>
-      <Navigation active={8} />
+      <Navigation active={4} />
       <Search />
 
-      <h1>Sopping Bag</h1>
+      <h1>Shopping Bag</h1>
       <div className="bag-list">
         <Table aria-label="Example static collection table" isStriped>
           <TableHeader>
@@ -71,10 +88,11 @@ export const Bag = () => {
                   <TableCell>
                     <div className="product-card">
                       <div className="product-image">
-                        <Image
+                        <img
                           shadow="sm"
                           radius="lg"
                           width="100%"
+                          // height={100}
                           alt={product.title}
                           className="w-full object-cover h-[140px]"
                           src={product.img}
@@ -87,7 +105,7 @@ export const Bag = () => {
                             product.gender.slice(1)}{" "}
                           |{" "}
                           {product.brand.charAt(0).toUpperCase() +
-                            product.brand.slice(1)}{" "} 
+                            product.brand.slice(1)}{" "}
                         </p>
                       </div>
                     </div>
@@ -96,18 +114,13 @@ export const Bag = () => {
                     <div className="select-size-cart">
                       <select
                         defaultValue={product.size}
-                        placeholder={cartItemSizes[product.id]}
-                        labelPlacement="outside-left"
                         className="max"
                         onChange={(e) => {
                           changeSize(product.id, product.size, e.target.value);
                         }}
                       >
-                        {sizes.map((size) => (
-                          <option
-                            key={size}
-                            value={size}
-                          >
+                        {getAvailableSizes(product.id).map((size) => (
+                          <option key={size} value={size}>
                             {size}
                           </option>
                         ))}
@@ -159,9 +172,83 @@ export const Bag = () => {
             <TableRow>
               <TableCell>
                 {" "}
-                <Link to="/paymentgateway">
-                  <Button disabled={bagItems.length === 0} fullWidth>Proceed to Checkout</Button>
-                </Link>
+                { }
+                <Button
+                  fullWidth
+                  onPress={onOpen}
+                  isDisabled={bagItems.length === 0 || !isUserLogged}
+                >
+                  Proceed to Checkout
+                </Button>
+                <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                  <ModalContent>
+                    {(onClose) => (
+                      <>
+                        <ModalBody className="modal-body">
+                          <Select
+                            label="Store"
+                            placeholder="Select the store"
+                            isRequired
+                            // onValueChange={setStore}
+                            onChange={(e) => { setStore(e.target.value) }}
+                          >
+                            {storeData.map((store) => (
+                              <SelectItem key={store[0]} value={store[0]}>
+                                {store[1]}
+                              </SelectItem>
+                            ))}
+                          </Select>
+                          <Select
+                            label="Route"
+                            placeholder="Select the route"
+                            isRequired
+                            onChange={(e) => { setRoute(e.target.value)}}
+                          >
+
+                            {routes && routes.map((val, index) => {
+                           
+                              return (
+                                <SelectItem key={val.id} value={val.id}>
+                                  {val.name}
+                                </SelectItem>
+                              )
+                            })}
+                          </Select>
+                        </ModalBody>
+                        <Link
+
+                          to={
+                            bagItems.length && isUserLogged
+                              ? "/paymentgateway"
+                              : "/bag"
+                          }
+                        >
+                          <Button className="modal-btn"
+                            onClick={() => {console.log(route)
+                              if (store && route) {
+                                reqSend.defaultReq("POST", 'shop/place-order', {
+                                  store_id: store,
+                                  route_id: route,
+                                  product_id: bagItems[0].id,
+                                  quntity: bagItems[0].quantity
+                                }, responce => {
+
+                                })
+                              }
+
+                            }}
+                            isDisabled={
+                              bagItems.length === 0 || !isUserLogged
+                            }
+                            fullWidth
+                          >
+                            Confim
+                          </Button>
+                        </Link>
+                      </>
+                    )}
+                  </ModalContent>
+                </Modal>
               </TableCell>
               <TableCell></TableCell>
               <TableCell></TableCell>

@@ -48,3 +48,22 @@
     margin: 2px 10px;
     font-weight: 700;
 }
+.user-icon {
+    font-weight: 1000;
+    cursor: pointer;
+}
+.login-btn {
+    font-size: 0.85rem;
+}
+
+.switch-link {
+    text-align: center;
+}
+
+.switch-link a{
+    cursor: pointer;
+}
+
+.form {
+    width: 250px;
+}
